@@ -1,10 +1,18 @@
 import { createHttpError } from "@lib/http-error";
 import { PrivateConversation } from "./private-conversation.model";
-import { CreatePrivateConversationPayload } from "./private-conversation.types";
+import { CreatePrivateConversationPayload, type PrivateConversationListItem } from "./private-conversation.types";
 import {
     checkPrivateConversationRoomExistence,
+    findAllPrivateConversationsByUserId,
     storePrivateConversation,
 } from "./private-conversation.repository";
+
+export const getAllPrivateConversationsByUserId = async (
+    limit: number,
+    userId: string,
+): Promise<PrivateConversationListItem[]> => {
+    return await findAllPrivateConversationsByUserId(limit, userId);
+};
 
 export const createPrivateConversation = async (
     data: CreatePrivateConversationPayload,
