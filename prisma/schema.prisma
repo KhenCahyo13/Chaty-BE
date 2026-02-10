@@ -6,7 +6,7 @@
 
 generator client {
   provider = "prisma-client"
-  output = "../src/generated/prisma"
+  output   = "../src/generated/prisma"
 }
 
 datasource db {
@@ -54,8 +54,8 @@ model PrivateConversation {
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt DateTime @default(now()) @map("updated_at") @db.Timestamptz(6)
 
-  user1    User              @relation("PrivateConversationUser1", fields: [user1Id], references: [id], onUpdate: Cascade, onDelete: Cascade)
-  user2    User              @relation("PrivateConversationUser2", fields: [user2Id], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  user1    User             @relation("PrivateConversationUser1", fields: [user1Id], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  user2    User             @relation("PrivateConversationUser2", fields: [user2Id], references: [id], onUpdate: Cascade, onDelete: Cascade)
   messages PrivateMessage[]
 
   @@unique([user1Id, user2Id])
@@ -71,7 +71,7 @@ model Group {
   createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt   DateTime @default(now()) @map("updated_at") @db.Timestamptz(6)
 
-  owner    User          @relation(fields: [ownerId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  owner    User           @relation(fields: [ownerId], references: [id], onUpdate: Cascade, onDelete: Cascade)
   members  GroupMember[]
   messages GroupMessage[]
 
@@ -98,25 +98,24 @@ model GroupMessage {
   groupId   String   @map("group_id") @db.Uuid
   senderId  String   @map("sender_id") @db.Uuid
   content   String?  @db.Text
-  type      String   @db.VarChar(10)
   isDeleted Boolean  @default(false) @map("is_deleted")
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt DateTime @default(now()) @map("updated_at") @db.Timestamptz(6)
 
-  group       Group                   @relation(fields: [groupId], references: [id], onUpdate: Cascade, onDelete: Cascade)
-  sender      User                    @relation(fields: [senderId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  group       Group                    @relation(fields: [groupId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  sender      User                     @relation(fields: [senderId], references: [id], onUpdate: Cascade, onDelete: Cascade)
   attachments GroupMessageAttachment[]
 
   @@map("group_messages")
 }
 
 model GroupMessageAttachment {
-  id       String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  id        String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   messageId String @map("message_id") @db.Uuid
-  fileName String @map("file_name") @db.VarChar(255)
-  fileUrl  String @map("file_url") @db.Text
-  fileType String @map("file_type") @db.Char(10)
-  fileSize BigInt @map("file_size") @db.BigInt
+  fileName  String @map("file_name") @db.VarChar(255)
+  fileUrl   String @map("file_url") @db.Text
+  fileType  String @map("file_type") @db.Char(10)
+  fileSize  BigInt @map("file_size") @db.BigInt
 
   message GroupMessage @relation(fields: [messageId], references: [id], onUpdate: Cascade, onDelete: Cascade)
 
@@ -128,13 +127,12 @@ model PrivateMessage {
   privateConversationId String   @map("private_conversation_id") @db.Uuid
   senderId              String   @map("sender_id") @db.Uuid
   content               String   @db.Text
-  type                  String   @db.VarChar(10)
   isDeleted             Boolean  @default(false) @map("is_deleted")
   createdAt             DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt             DateTime @default(now()) @map("updated_at") @db.Timestamptz(6)
 
-  conversation PrivateConversation @relation(fields: [privateConversationId], references: [id], onUpdate: Cascade, onDelete: Cascade)
-  sender       User                @relation(fields: [senderId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  conversation PrivateConversation        @relation(fields: [privateConversationId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  sender       User                       @relation(fields: [senderId], references: [id], onUpdate: Cascade, onDelete: Cascade)
   attachments  PrivateMessageAttachment[]
   reads        PrivateMessageRead[]
 

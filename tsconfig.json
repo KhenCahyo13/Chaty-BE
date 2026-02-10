@@ -8,7 +8,10 @@
     "baseUrl": ".",
     "paths": {
       "@generated/*": ["src/generated/*"],
-      "@modules/*": ["src/modules/*"]
+      "@modules/*": ["src/modules/*"],
+      "@lib/*": ["src/lib/*"],
+      "@middlewares/*": ["src/middlewares/*"],
+      "@config/*": ["src/config/*"]
     },
     "strict": true,
     "esModuleInterop": true,
