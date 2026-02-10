@@ -17,6 +17,6 @@ export type RefreshResult = AuthTokens & {
     userId: string;
 };
 
-import type { HttpError } from "../../lib/http-error";
+import type { HttpError } from '../../lib/http-error';
 
 export type AuthError = HttpError;

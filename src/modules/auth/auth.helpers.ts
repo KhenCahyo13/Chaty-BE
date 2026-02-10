@@ -1,8 +1,8 @@
-import { jwtConfig } from "@config/jwt";
-import { HttpError } from "@lib/http-error";
-import jwt from "jsonwebtoken";
+import { jwtConfig } from '@config/jwt';
+import { HttpError } from '@lib/http-error';
+import jwt from 'jsonwebtoken';
 
-import type { AuthTokens } from "./auth.types";
+import type { AuthTokens } from './auth.types';
 
 const refreshTokenStore = new Map<string, string>();
 
@@ -19,21 +19,24 @@ export const buildAccessToken = (userId: string, username?: string): string =>
     });
 
 export const buildRefreshToken = (userId: string): string =>
-    jwt.sign({ sub: userId, type: "refresh" }, refreshTokenSecret, {
+    jwt.sign({ sub: userId, type: 'refresh' }, refreshTokenSecret, {
         expiresIn: refreshTokenExpiresIn,
     });
 
 export const createAuthError = (
     message: string,
     statusCode = 401,
-    errors?: unknown,
+    errors?: unknown
 ): HttpError => ({
     statusCode,
     message,
     errors,
 });
 
-export const storeRefreshToken = (refreshToken: string, userId: string): void => {
+export const storeRefreshToken = (
+    refreshToken: string,
+    userId: string
+): void => {
     refreshTokenStore.set(refreshToken, userId);
 };
 
@@ -51,38 +54,29 @@ export const revokeUserRefreshTokens = (userId: string): void => {
 
 export const assertRefreshToken = (refreshToken: string): string => {
     if (!refreshTokenStore.has(refreshToken)) {
-        throw createAuthError(
-            "Refresh token is not valid.",
-            401,
-        );
+        throw createAuthError('Refresh token is not valid.', 401);
     }
 
     try {
         const payload = jwt.verify(
             refreshToken,
-            refreshTokenSecret,
+            refreshTokenSecret
         ) as jwt.JwtPayload;
         const userId = payload.sub;
 
-        if (!userId || payload.type !== "refresh") {
-            throw createAuthError(
-                "Refresh token is not valid.",
-                401,
-            );
+        if (!userId || payload.type !== 'refresh') {
+            throw createAuthError('Refresh token is not valid.', 401);
         }
 
         return String(userId);
     } catch {
-        throw createAuthError(
-            "Refresh token is not valid.",
-            401,
-        );
+        throw createAuthError('Refresh token is not valid.', 401);
     }
 };
 
 export const rotateRefreshToken = (
     refreshToken: string,
-    userId: string,
+    userId: string
 ): AuthTokens => {
     revokeRefreshToken(refreshToken);
 
@@ -93,35 +87,29 @@ export const rotateRefreshToken = (
 
     return {
         access_token: accessToken,
-        refresh_token: newRefreshToken
+        refresh_token: newRefreshToken,
     };
 };
 
 export const verifyAccessToken = (
-    accessToken: string,
+    accessToken: string
 ): { userId: string; username?: string } => {
     try {
         const payload = jwt.verify(
             accessToken,
-            accessTokenSecret,
+            accessTokenSecret
         ) as jwt.JwtPayload;
         const userId = payload.sub;
 
         if (!userId) {
-            throw createAuthError(
-                "Access token is not valid.",
-                401,
-            );
+            throw createAuthError('Access token is not valid.', 401);
         }
 
         const username =
-            typeof payload.username === "string" ? payload.username : undefined;
+            typeof payload.username === 'string' ? payload.username : undefined;
 
         return { userId: String(userId), username };
     } catch {
-        throw createAuthError(
-            "Access token is not valid.",
-            401,
-        );
+        throw createAuthError('Access token is not valid.', 401);
     }
 };

@@ -1,7 +1,14 @@
-import prisma from "@lib/prisma";
-import { PrivateConversation } from "./private-conversation.model";
-import { CreatePrivateConversationPayload, type PrivateConversationListItem } from "./private-conversation.types";
-import { lastMessageListSelect, userListSelect } from './private-conversation.select';
+import prisma from '@lib/prisma';
+
+import { PrivateConversation } from './private-conversation.model';
+import {
+    lastMessageListSelect,
+    userListSelect,
+} from './private-conversation.select';
+import {
+    CreatePrivateConversationPayload,
+    type PrivateConversationListItem,
+} from './private-conversation.types';
 
 export const findAllPrivateConversationsByUserId = async (
     limit: number,
@@ -10,10 +17,7 @@ export const findAllPrivateConversationsByUserId = async (
     const conversations = await prisma.privateConversation.findMany({
         take: limit,
         where: {
-            OR: [
-                { user1Id: userId },
-                { user2Id: userId },
-            ],
+            OR: [{ user1Id: userId }, { user2Id: userId }],
             messages: {
                 some: {},
             },
@@ -28,7 +32,7 @@ export const findAllPrivateConversationsByUserId = async (
             messages: {
                 take: 1,
                 orderBy: {
-                    createdAt: "desc",
+                    createdAt: 'desc',
                 },
                 where: {
                     senderId: {
@@ -41,11 +45,18 @@ export const findAllPrivateConversationsByUserId = async (
     });
 
     return conversations.map((conversation) => {
-        const sender = conversation.user1Id === userId ? conversation.user2 : conversation.user1;
-        const lastMessage = conversation.messages[0] ? {
-            ...conversation.messages[0],
-            content: conversation.messages[0].isDeleted ? null : conversation.messages[0].content,
-        } : null;
+        const sender =
+            conversation.user1Id === userId
+                ? conversation.user2
+                : conversation.user1;
+        const lastMessage = conversation.messages[0]
+            ? {
+                  ...conversation.messages[0],
+                  content: conversation.messages[0].isDeleted
+                      ? null
+                      : conversation.messages[0].content,
+              }
+            : null;
 
         return {
             id: conversation.id,
@@ -55,15 +66,20 @@ export const findAllPrivateConversationsByUserId = async (
             lastMessage,
         };
     });
-}
+};
 
-export const storePrivateConversation = async (data: CreatePrivateConversationPayload): Promise<PrivateConversation> => {
+export const storePrivateConversation = async (
+    data: CreatePrivateConversationPayload
+): Promise<PrivateConversation> => {
     return await prisma.privateConversation.create({
         data: data,
     });
-}
+};
 
-export const checkPrivateConversationRoomExistence = async (user1Id: string, user2Id: string): Promise<PrivateConversation | null> => {
+export const checkPrivateConversationRoomExistence = async (
+    user1Id: string,
+    user2Id: string
+): Promise<PrivateConversation | null> => {
     return await prisma.privateConversation.findFirst({
         where: {
             OR: [
@@ -74,8 +90,8 @@ export const checkPrivateConversationRoomExistence = async (user1Id: string, use
                 {
                     user1Id: user2Id,
                     user2Id: user1Id,
-                }
-            ]
-        }
+                },
+            ],
+        },
     });
-}
+};

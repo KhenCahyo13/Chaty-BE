@@ -21,4 +21,4 @@ const lastMessageListSelect = {
     createdAt: true,
 } as const;
 
-export { profileListSelect, userListSelect, lastMessageListSelect };
+export { lastMessageListSelect, profileListSelect, userListSelect };

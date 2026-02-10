@@ -1,9 +1,9 @@
-import prisma from "@lib/prisma";
+import prisma from '@lib/prisma';
 
-import type { UserAuthRecord } from "./user.types";
+import type { UserAuthRecord } from './user.types';
 
 export const findUserByUsername = async (
-    username: string,
+    username: string
 ): Promise<UserAuthRecord | null> => {
     return prisma.user.findUnique({
         where: { username },

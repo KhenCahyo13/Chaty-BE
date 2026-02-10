@@ -1,3 +1,3 @@
-import type { PrivateConversation } from "@generated/prisma/client";
+import type { PrivateConversation } from '@generated/prisma/client';
 
 export type { PrivateConversation };

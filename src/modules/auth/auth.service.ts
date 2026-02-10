@@ -1,5 +1,5 @@
-import { findUserByUsername } from "@modules/user/user.repository";
-import bcrypt from "bcryptjs";
+import { findUserByUsername } from '@modules/user/user.repository';
+import bcrypt from 'bcryptjs';
 
 import {
     assertRefreshToken,
@@ -9,19 +9,22 @@ import {
     revokeUserRefreshTokens,
     rotateRefreshToken,
     storeRefreshToken,
-} from "./auth.helpers";
-import type { LoginResult, RefreshResult } from "./auth.types";
+} from './auth.helpers';
+import type { LoginResult, RefreshResult } from './auth.types';
 
-export const login = async (username: string, password: string): Promise<LoginResult> => {
+export const login = async (
+    username: string,
+    password: string
+): Promise<LoginResult> => {
     const user = await findUserByUsername(username);
 
     if (!user) {
-        throw createAuthError("Username atau password salah.", 401);
+        throw createAuthError('Username atau password salah.', 401);
     }
 
     const isValidPassword = await bcrypt.compare(password, user.password);
     if (!isValidPassword) {
-        throw createAuthError("Username atau password salah.", 401);
+        throw createAuthError('Username atau password salah.', 401);
     }
 
     const accessToken = buildAccessToken(user.id, user.username);
@@ -34,7 +37,7 @@ export const login = async (username: string, password: string): Promise<LoginRe
     return {
         user: safeUser,
         access_token: accessToken,
-        refresh_token: refreshToken
+        refresh_token: refreshToken,
     };
 };
 

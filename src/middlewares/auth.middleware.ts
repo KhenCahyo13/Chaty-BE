@@ -18,17 +18,13 @@ export const authenticateUser = (
 ): void => {
     const header = req.headers.authorization;
     if (!header || !header.startsWith('Bearer ')) {
-        res.status(401).json(
-            errorResponse('Access token is not valid.')
-        );
+        res.status(401).json(errorResponse('Access token is not valid.'));
         return;
     }
 
     const token = header.slice('Bearer '.length).trim();
     if (!token) {
-        res.status(401).json(
-            errorResponse('Access token is not valid.')
-        );
+        res.status(401).json(errorResponse('Access token is not valid.'));
         return;
     }
 

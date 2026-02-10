@@ -1,26 +1,31 @@
-import { Router } from "express";
+import { toHttpError } from '@lib/http-error';
+import { errorResponse, successResponse } from '@lib/response';
+import { mapZodIssues } from '@lib/validation-error';
+import {
+    authenticateUser,
+    type AuthRequest,
+} from '@middlewares/auth.middleware';
+import { Router } from 'express';
 
-import { toHttpError } from "@lib/http-error";
-import { errorResponse, successResponse } from "@lib/response";
-import { mapZodIssues } from "@lib/validation-error";
-import { authenticateUser, type AuthRequest } from "@middlewares/auth.middleware";
-import { createPrivateConversationSchema } from "./private-conversation.schema";
-import { createPrivateConversation } from "./private-conversation.service";
 import { findAllPrivateConversationsByUserId } from './private-conversation.repository';
+import { createPrivateConversationSchema } from './private-conversation.schema';
+import { createPrivateConversation } from './private-conversation.service';
 
 const router = Router();
 
-router.get("", authenticateUser, async (req, res) => {
+router.get('', authenticateUser, async (req, res) => {
     try {
         const { userId } = (req as AuthRequest).auth;
-        const limit = req.query.limit ? parseInt(req.query.limit as string, 10) : 20;
+        const limit = req.query.limit
+            ? parseInt(req.query.limit as string, 10)
+            : 20;
         const result = await findAllPrivateConversationsByUserId(limit, userId);
 
         return res.json(
             successResponse(
-                "Private conversations retrieved successfully.",
-                result,
-            ),
+                'Private conversations retrieved successfully.',
+                result
+            )
         );
     } catch (error) {
         const { statusCode, message, errors } = toHttpError(error);
@@ -28,16 +33,16 @@ router.get("", authenticateUser, async (req, res) => {
     }
 });
 
-router.post("", authenticateUser, async (req, res) => {
+router.post('', authenticateUser, async (req, res) => {
     const parsed = createPrivateConversationSchema.safeParse(req.body ?? {});
     if (!parsed.success) {
         return res
             .status(400)
             .json(
                 errorResponse(
-                    "Payload is not valid.",
-                    mapZodIssues(parsed.error.issues),
-                ),
+                    'Payload is not valid.',
+                    mapZodIssues(parsed.error.issues)
+                )
             );
     }
 
@@ -50,9 +55,9 @@ router.post("", authenticateUser, async (req, res) => {
 
         return res.json(
             successResponse(
-                "Private conversation created successfully.",
-                result,
-            ),
+                'Private conversation created successfully.',
+                result
+            )
         );
     } catch (error) {
         const { statusCode, message, errors } = toHttpError(error);

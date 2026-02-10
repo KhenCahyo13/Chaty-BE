@@ -13,7 +13,7 @@ export const isHttpError = (error: unknown): error is HttpError =>
 export const createHttpError = (
     message: string,
     statusCode: number,
-    errors?: unknown,
+    errors?: unknown
 ): HttpError => ({
     statusCode,
     message,
