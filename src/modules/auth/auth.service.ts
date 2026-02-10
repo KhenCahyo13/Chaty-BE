@@ -16,12 +16,12 @@ export const login = async (username: string, password: string): Promise<LoginRe
     const user = await findUserByUsername(username);
 
     if (!user) {
-        throw createAuthError("Username atau password salah.", 401, "INVALID_CREDENTIALS");
+        throw createAuthError("Username atau password salah.", 401);
     }
 
     const isValidPassword = await bcrypt.compare(password, user.password);
     if (!isValidPassword) {
-        throw createAuthError("Username atau password salah.", 401, "INVALID_CREDENTIALS");
+        throw createAuthError("Username atau password salah.", 401);
     }
 
     const accessToken = buildAccessToken(user.id, user.username);

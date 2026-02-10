@@ -8,7 +8,7 @@ export type SuccessResponse<T, TMeta = null> = {
 export type ErrorResponse<E = unknown> = {
     success: false;
     message: string;
-    errors: E;
+    errors?: E;
 };
 
 export const successResponse = <TData, TMeta = null>(
@@ -24,7 +24,7 @@ export const successResponse = <TData, TMeta = null>(
 
 export const errorResponse = <E>(
     message: string,
-    errors: E
+    errors?: E
 ): ErrorResponse<E> => ({
     success: false,
     message,

@@ -54,7 +54,6 @@ export const assertRefreshToken = (refreshToken: string): string => {
         throw createAuthError(
             "Refresh token is not valid.",
             401,
-            "INVALID_REFRESH_TOKEN",
         );
     }
 
@@ -69,7 +68,6 @@ export const assertRefreshToken = (refreshToken: string): string => {
             throw createAuthError(
                 "Refresh token is not valid.",
                 401,
-                "INVALID_REFRESH_TOKEN",
             );
         }
 
@@ -78,7 +76,6 @@ export const assertRefreshToken = (refreshToken: string): string => {
         throw createAuthError(
             "Refresh token is not valid.",
             401,
-            "INVALID_REFRESH_TOKEN",
         );
     }
 };
@@ -114,7 +111,6 @@ export const verifyAccessToken = (
             throw createAuthError(
                 "Access token is not valid.",
                 401,
-                "INVALID_ACCESS_TOKEN",
             );
         }
 
@@ -126,7 +122,6 @@ export const verifyAccessToken = (
         throw createAuthError(
             "Access token is not valid.",
             401,
-            "INVALID_ACCESS_TOKEN",
         );
     }
 };

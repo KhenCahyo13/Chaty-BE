@@ -10,6 +10,16 @@ export const isHttpError = (error: unknown): error is HttpError =>
     'statusCode' in error &&
     'message' in error;
 
+export const createHttpError = (
+    message: string,
+    statusCode: number,
+    errors?: unknown,
+): HttpError => ({
+    statusCode,
+    message,
+    errors: errors ?? null,
+});
+
 export const toHttpError = (error: unknown): HttpError => {
     if (isHttpError(error)) {
         return error;
@@ -18,6 +28,6 @@ export const toHttpError = (error: unknown): HttpError => {
     return {
         statusCode: 500,
         message: 'Terjadi kesalahan pada server.',
-        errors: 'INTERNAL_SERVER_ERROR',
+        errors: null,
     };
 };
