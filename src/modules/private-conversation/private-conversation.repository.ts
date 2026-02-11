@@ -39,7 +39,18 @@ export const findAllPrivateConversationsByUserId = async (
                         not: userId,
                     },
                 },
-                select: lastMessageListSelect,
+                select: {
+                    ...lastMessageListSelect,
+                    _count: {
+                        select: {
+                            reads: {
+                                where: {
+                                    receiverId: userId
+                                }
+                            }
+                        }
+                    }
+                }
             },
         },
     });
@@ -50,13 +61,17 @@ export const findAllPrivateConversationsByUserId = async (
                 ? conversation.user2
                 : conversation.user1;
         const lastMessage = conversation.messages[0]
-            ? {
-                  ...conversation.messages[0],
-                  content: conversation.messages[0].isDeleted
-                      ? null
-                      : conversation.messages[0].content,
-              }
+            ? (() => {
+                const { _count, ...message } = conversation.messages[0];
+
+                return {
+                    ...message,
+                    isRead: _count.reads > 0,
+                    content: message.isDeleted ? null : message.content,
+                };
+            })()
             : null;
+
 
         return {
             id: conversation.id,
