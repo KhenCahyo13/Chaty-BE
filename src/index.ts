@@ -5,10 +5,15 @@ import express from 'express';
 import { appConfig } from './config/app';
 import authController from './modules/auth/auth.controller';
 import privateConversationController from './modules/private-conversation/private-conversation.controller';
+import cors from 'cors';
 
 const app = express();
+const corsMiddleware = cors({
+    origin: ['http://localhost:5173']
+});
 const { port } = appConfig;
 
+app.use(corsMiddleware);
 app.use(express.json());
 
 const api = express.Router();
