@@ -33,12 +33,7 @@ export const findAllPrivateConversationsByUserId = async (
             messages: {
                 take: 1,
                 orderBy: {
-                    createdAt: 'asc',
-                },
-                where: {
-                    senderId: {
-                        not: userId,
-                    },
+                    createdAt: 'desc',
                 },
                 select: {
                     ...lastMessageListSelect,
@@ -67,7 +62,7 @@ export const findAllPrivateConversationsByUserId = async (
 
                   return {
                       ...message,
-                      isMe: sender.id === userId,
+                      isMe: sender.id !== userId,
                       isRead: _count.reads > 0,
                       content: message.isDeleted ? null : message.content,
                   };

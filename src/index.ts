@@ -6,6 +6,7 @@ import express from 'express';
 import { appConfig } from './config/app';
 import authController from './modules/auth/auth.controller';
 import privateConversationController from './modules/private-conversation/private-conversation.controller';
+import privateMessageController from './modules/private-message/private-message.controller';
 
 const app = express();
 const corsMiddleware = cors({
@@ -24,6 +25,7 @@ api.get('/', (_req, res) => {
 });
 api.use('/auth', authController);
 api.use('/private-conversations', privateConversationController);
+api.use('/private-messages', privateMessageController);
 
 app.use('/api/v1', api);
 
