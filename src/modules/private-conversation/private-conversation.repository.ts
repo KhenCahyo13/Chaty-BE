@@ -2,6 +2,7 @@ import prisma from '@lib/prisma';
 
 import { PrivateConversation } from './private-conversation.model';
 import {
+    detailsMessageSelect,
     lastMessageListSelect,
     userListSelect,
 } from './private-conversation.select';
@@ -32,7 +33,7 @@ export const findAllPrivateConversationsByUserId = async (
             messages: {
                 take: 1,
                 orderBy: {
-                    createdAt: 'desc',
+                    createdAt: 'asc',
                 },
                 where: {
                     senderId: {
@@ -66,6 +67,7 @@ export const findAllPrivateConversationsByUserId = async (
 
                 return {
                     ...message,
+                    isMe: sender.id === userId,
                     isRead: _count.reads > 0,
                     content: message.isDeleted ? null : message.content,
                 };
@@ -81,6 +83,58 @@ export const findAllPrivateConversationsByUserId = async (
             lastMessage,
         };
     });
+};
+
+export const findPrivateConversationDetailsById = async (id: string, userId: string) => {
+    const conversation = await prisma.privateConversation.findFirst({
+        where: {
+            id: id,
+            OR: [{ user1Id: userId }, { user2Id: userId }],
+        },
+        include: {
+            user1: {
+                select: userListSelect,
+            },
+            user2: {
+                select: userListSelect,
+            },
+            messages: {
+                orderBy: {
+                    createdAt: 'asc',
+                },
+                select: {
+                    ...detailsMessageSelect,
+                    _count: {
+                        select: {
+                            reads: true
+                        }
+                    }
+                },
+            }
+        }
+    });
+
+    return {
+        id: conversation?.id,
+        createdAt: conversation?.createdAt,
+        updatedAt: conversation?.updatedAt,
+        receiver: conversation?.user1Id === userId ? conversation.user2 : conversation?.user1,
+        messages: conversation?.messages.map(message => {
+            const { _count, ...msg } = message;
+
+            return {
+                id: msg.id,
+                content: msg.isDeleted ? null : msg.content,
+                isMe: msg.senderId === userId,
+                isDeleted: msg.isDeleted,
+                isRead:
+                    msg.senderId === userId
+                        ? _count.reads > 0
+                        : true,
+                createdAt: msg.createdAt,
+            };
+        }) || []
+    };
 };
 
 export const storePrivateConversation = async (

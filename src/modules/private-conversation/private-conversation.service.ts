@@ -4,6 +4,7 @@ import { PrivateConversation } from './private-conversation.model';
 import {
     checkPrivateConversationRoomExistence,
     findAllPrivateConversationsByUserId,
+    findPrivateConversationDetailsById,
     storePrivateConversation,
 } from './private-conversation.repository';
 import {
@@ -16,6 +17,16 @@ export const getAllPrivateConversationsByUserId = async (
     userId: string
 ): Promise<PrivateConversationListItem[]> => {
     return await findAllPrivateConversationsByUserId(limit, userId);
+};
+
+export const getPrivateConversationDetailsById = async (id: string, userId: string) => {
+    const data = await findPrivateConversationDetailsById(id, userId);
+
+    if (!data) {
+        throw createHttpError('Private conversation not found.', 404);
+    }
+
+    return data;
 };
 
 export const createPrivateConversation = async (

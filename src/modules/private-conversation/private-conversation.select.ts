@@ -1,11 +1,12 @@
-const profileListSelect = {
+// List Select
+export const profileListSelect = {
     id: true,
     fullName: true,
     about: true,
     avatarUrl: true,
 } as const;
 
-const userListSelect = {
+export const userListSelect = {
     id: true,
     username: true,
     email: true,
@@ -14,11 +15,15 @@ const userListSelect = {
     },
 } as const;
 
-const lastMessageListSelect = {
+export const lastMessageListSelect = {
     id: true,
     content: true,
     isDeleted: true,
     createdAt: true,
 } as const;
 
-export { lastMessageListSelect, profileListSelect, userListSelect };
+// Details Select
+export const detailsMessageSelect = {
+    ...lastMessageListSelect,
+    senderId: true,
+} as const;
