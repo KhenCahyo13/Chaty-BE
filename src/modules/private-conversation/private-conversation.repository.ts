@@ -46,12 +46,12 @@ export const findAllPrivateConversationsByUserId = async (
                         select: {
                             reads: {
                                 where: {
-                                    receiverId: userId
-                                }
-                            }
-                        }
-                    }
-                }
+                                    receiverId: userId,
+                                },
+                            },
+                        },
+                    },
+                },
             },
         },
     });
@@ -63,17 +63,16 @@ export const findAllPrivateConversationsByUserId = async (
                 : conversation.user1;
         const lastMessage = conversation.messages[0]
             ? (() => {
-                const { _count, ...message } = conversation.messages[0];
+                  const { _count, ...message } = conversation.messages[0];
 
-                return {
-                    ...message,
-                    isMe: sender.id === userId,
-                    isRead: _count.reads > 0,
-                    content: message.isDeleted ? null : message.content,
-                };
-            })()
+                  return {
+                      ...message,
+                      isMe: sender.id === userId,
+                      isRead: _count.reads > 0,
+                      content: message.isDeleted ? null : message.content,
+                  };
+              })()
             : null;
-
 
         return {
             id: conversation.id,
@@ -85,7 +84,10 @@ export const findAllPrivateConversationsByUserId = async (
     });
 };
 
-export const findPrivateConversationDetailsById = async (id: string, userId: string) => {
+export const findPrivateConversationDetailsById = async (
+    id: string,
+    userId: string
+) => {
     const conversation = await prisma.privateConversation.findFirst({
         where: {
             id: id,
@@ -106,34 +108,35 @@ export const findPrivateConversationDetailsById = async (id: string, userId: str
                     ...detailsMessageSelect,
                     _count: {
                         select: {
-                            reads: true
-                        }
-                    }
+                            reads: true,
+                        },
+                    },
                 },
-            }
-        }
+            },
+        },
     });
 
     return {
         id: conversation?.id,
         createdAt: conversation?.createdAt,
         updatedAt: conversation?.updatedAt,
-        receiver: conversation?.user1Id === userId ? conversation.user2 : conversation?.user1,
-        messages: conversation?.messages.map(message => {
-            const { _count, ...msg } = message;
+        receiver:
+            conversation?.user1Id === userId
+                ? conversation.user2
+                : conversation?.user1,
+        messages:
+            conversation?.messages.map((message) => {
+                const { _count, ...msg } = message;
 
-            return {
-                id: msg.id,
-                content: msg.isDeleted ? null : msg.content,
-                isMe: msg.senderId === userId,
-                isDeleted: msg.isDeleted,
-                isRead:
-                    msg.senderId === userId
-                        ? _count.reads > 0
-                        : true,
-                createdAt: msg.createdAt,
-            };
-        }) || []
+                return {
+                    id: msg.id,
+                    content: msg.isDeleted ? null : msg.content,
+                    isMe: msg.senderId === userId,
+                    isDeleted: msg.isDeleted,
+                    isRead: msg.senderId === userId ? _count.reads > 0 : true,
+                    createdAt: msg.createdAt,
+                };
+            }) || [],
     };
 };
 

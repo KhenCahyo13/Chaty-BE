@@ -9,7 +9,10 @@ import { Router } from 'express';
 
 import { findAllPrivateConversationsByUserId } from './private-conversation.repository';
 import { createPrivateConversationSchema } from './private-conversation.schema';
-import { createPrivateConversation, getPrivateConversationDetailsById } from './private-conversation.service';
+import {
+    createPrivateConversation,
+    getPrivateConversationDetailsById,
+} from './private-conversation.service';
 
 const router = Router();
 
@@ -37,7 +40,10 @@ router.get('/:id', authenticateUser, async (req, res) => {
     try {
         const id = req.params.id;
         const { userId } = (req as AuthRequest).auth;
-        const result = await getPrivateConversationDetailsById(id as string, userId);
+        const result = await getPrivateConversationDetailsById(
+            id as string,
+            userId
+        );
 
         return res.json(
             successResponse(

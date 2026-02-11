@@ -19,7 +19,10 @@ export const getAllPrivateConversationsByUserId = async (
     return await findAllPrivateConversationsByUserId(limit, userId);
 };
 
-export const getPrivateConversationDetailsById = async (id: string, userId: string) => {
+export const getPrivateConversationDetailsById = async (
+    id: string,
+    userId: string
+) => {
     const data = await findPrivateConversationDetailsById(id, userId);
 
     if (!data) {

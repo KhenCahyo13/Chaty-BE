@@ -1,15 +1,15 @@
 import 'dotenv/config';
 
+import cors from 'cors';
 import express from 'express';
 
 import { appConfig } from './config/app';
 import authController from './modules/auth/auth.controller';
 import privateConversationController from './modules/private-conversation/private-conversation.controller';
-import cors from 'cors';
 
 const app = express();
 const corsMiddleware = cors({
-    origin: ['http://localhost:5173']
+    origin: ['http://localhost:5173'],
 });
 const { port } = appConfig;
 
