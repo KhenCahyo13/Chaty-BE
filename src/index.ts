@@ -2,24 +2,28 @@ import 'dotenv/config';
 
 import cors from 'cors';
 import express from 'express';
+import http from 'http';
 
 import { appConfig } from './config/app';
 import authController from './modules/auth/auth.controller';
 import privateConversationController from './modules/private-conversation/private-conversation.controller';
 import privateMessageController from './modules/private-message/private-message.controller';
+import { initSocket } from '@lib/socket';
 
 const app = express();
-const corsMiddleware = cors({
-    origin: ['http://localhost:5173'],
-});
 const { port } = appConfig;
 
-app.use(corsMiddleware);
+app.use(
+    cors({
+        origin: 'http://localhost:5173',
+        credentials: true,
+    })
+);
+
 app.use(express.json());
 
 const api = express.Router();
 
-// Route List
 api.get('/', (_req, res) => {
     res.json({ message: 'Chaty API already running' });
 });
@@ -29,6 +33,10 @@ api.use('/private-messages', privateMessageController);
 
 app.use('/api/v1', api);
 
-app.listen(port, () => {
-    console.log(`Server running on http://localhost:${port}`);
+const server = http.createServer(app);
+
+initSocket(server);
+
+server.listen(port, () => {
+    console.log(`HTTP + Socket server running on http://localhost:${port}`);
 });

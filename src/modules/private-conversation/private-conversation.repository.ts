@@ -2,6 +2,7 @@ import prisma from '@lib/prisma';
 
 import { PrivateConversation } from './private-conversation.model';
 import {
+    conversationUserIdsSelect,
     detailsMessageSelect,
     lastMessageListSelect,
     userListSelect,
@@ -134,6 +135,19 @@ export const findPrivateConversationDetailsById = async (
             }) || [],
     };
 };
+
+export const findPrivateConversationUserIdsById = async (
+    id: string
+): Promise<Partial<PrivateConversation> | null> => {
+    const conversation = await prisma.privateConversation.findUnique({
+        where: {
+            id: id,
+        },
+        select: conversationUserIdsSelect,
+    });
+
+    return conversation;
+}
 
 export const storePrivateConversation = async (
     data: CreatePrivateConversationPayload

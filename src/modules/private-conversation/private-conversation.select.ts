@@ -28,3 +28,9 @@ export const detailsMessageSelect = {
     ...lastMessageListSelect,
     senderId: true,
 } as const;
+
+export const conversationUserIdsSelect = {
+    id: true,
+    user1Id: true,
+    user2Id: true,
+} as const;
