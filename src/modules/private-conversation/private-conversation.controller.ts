@@ -12,6 +12,7 @@ import { createPrivateConversationSchema } from './private-conversation.schema';
 import {
     createPrivateConversation,
     getPrivateConversationDetailsById,
+    getPrivateConversationMessagesById,
 } from './private-conversation.service';
 
 const router = Router();
@@ -38,17 +39,42 @@ router.get('', authenticateUser, async (req, res) => {
 
 router.get('/:id', authenticateUser, async (req, res) => {
     try {
-        const id = req.params.id;
+        const { id } = req.params;
         const { userId } = (req as AuthRequest).auth;
-        const result = await getPrivateConversationDetailsById(
-            id as string,
-            userId
-        );
+        const result = await getPrivateConversationDetailsById(id as string, userId);
 
         return res.json(
             successResponse(
                 'Private conversation details retrieved successfully.',
                 result
+            )
+        );
+    } catch (error) {
+        const { statusCode, message, errors } = toHttpError(error);
+        return res.status(statusCode).json(errorResponse(message, errors));
+    }
+});
+
+router.get('/:id/messages', authenticateUser, async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { limit, cursor } = req.query;
+        const { userId } = (req as AuthRequest).auth;
+
+        const result = await getPrivateConversationMessagesById(
+            id as string,
+            userId,
+            limit ? parseInt(limit as string, 10) : 10,
+            cursor as string | undefined
+        );
+
+        return res.json(
+            successResponse(
+                'Private conversation messages retrieved successfully.',
+                result.messages,
+                {
+                    nextCursor: result.nextCursor,
+                }
             )
         );
     } catch (error) {

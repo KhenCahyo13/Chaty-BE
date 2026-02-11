@@ -5,6 +5,7 @@ import {
     checkPrivateConversationRoomExistence,
     findAllPrivateConversationsByUserId,
     findPrivateConversationDetailsById,
+    findPrivateConversationMessagesById,
     storePrivateConversation,
 } from './private-conversation.repository';
 import {
@@ -21,7 +22,7 @@ export const getAllPrivateConversationsByUserId = async (
 
 export const getPrivateConversationDetailsById = async (
     id: string,
-    userId: string
+    userId: string,
 ) => {
     const data = await findPrivateConversationDetailsById(id, userId);
 
@@ -31,6 +32,26 @@ export const getPrivateConversationDetailsById = async (
 
     return data;
 };
+
+export const getPrivateConversationMessagesById = async (
+    id: string,
+    userId: string,
+    limit: number,
+    cursor?: string
+) => {
+    const data = await findPrivateConversationMessagesById(
+        id,
+        userId,
+        limit,
+        cursor
+    );
+
+    if (!data) {
+        throw createHttpError('Private conversation not found.', 404);
+    }
+
+    return data;
+}
 
 export const createPrivateConversation = async (
     data: CreatePrivateConversationPayload

@@ -15,7 +15,7 @@ type UserPayload = Prisma.UserGetPayload<{ select: typeof userListSelect }>;
 type LastMessagePayload = Prisma.PrivateMessageGetPayload<{
     select: typeof lastMessageListSelect;
 }>;
-type LastMessageWithRedaction = Omit<LastMessagePayload, 'content'> & {
+export type LastMessageWithRedaction = Omit<LastMessagePayload, 'content'> & {
     content: string | null;
 };
 

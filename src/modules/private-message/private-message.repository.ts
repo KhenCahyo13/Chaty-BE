@@ -1,7 +1,9 @@
 import prisma from '@lib/prisma';
 
 import { PrivateMessage } from './private-message.model';
-import { CreatePrivateMessageValues } from './private-message.types';
+import { CreatePrivateMessageValues, SocketPrivateMessagePayload } from './private-message.types';
+import { createHttpError } from '@lib/http-error';
+import { LastMessageWithRedaction } from '@modules/private-conversation/private-conversation.types';
 
 export const storePrivateMessage = async (
     data: CreatePrivateMessageValues,
@@ -14,4 +16,30 @@ export const storePrivateMessage = async (
             senderId: senderId,
         },
     });
+};
+
+export const formatPrivateMessageForSocket = async (
+    messageId: string
+): Promise<SocketPrivateMessagePayload> => {
+    const message = await prisma.privateMessage.findUnique({
+        where: { id: messageId },
+        include: {
+            _count: {
+                select: { reads: true },
+            },
+        },
+    });
+
+    if (!message) {
+        throw createHttpError('Private message not found.', 404);
+    }
+
+    return {
+        id: message.id,
+        content: message.isDeleted ? null : message.content,
+        senderId: message.senderId,
+        isDeleted: message.isDeleted,
+        createdAt: message.createdAt,
+        readsCount: message._count.reads,
+    };
 };
