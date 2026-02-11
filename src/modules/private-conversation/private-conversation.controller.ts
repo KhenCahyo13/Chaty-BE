@@ -4,7 +4,7 @@ import { mapZodIssues } from '@lib/validation-error';
 import {
     authenticateUser,
     type AuthRequest,
-} from '@middlewares/auth.middleware';
+} from '@modules/auth/auth.middleware';
 import { Router } from 'express';
 
 import { findAllPrivateConversationsByUserId } from './private-conversation.repository';

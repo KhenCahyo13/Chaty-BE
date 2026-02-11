@@ -1,8 +1,8 @@
 import type { NextFunction, Request, Response } from 'express';
 
-import { toHttpError } from '../lib/http-error';
-import { errorResponse } from '../lib/response';
-import { verifyAccessToken } from '../modules/auth/auth.helpers';
+import { toHttpError } from '../../lib/http-error';
+import { errorResponse } from '../../lib/response';
+import { verifyAccessToken } from './auth.helpers';
 
 export type AuthRequest = Request & {
     auth: {

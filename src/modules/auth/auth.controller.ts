@@ -1,7 +1,7 @@
 import { toHttpError } from '@lib/http-error';
 import { errorResponse, successResponse } from '@lib/response';
 import { mapZodIssues } from '@lib/validation-error';
-import { authenticateUser, AuthRequest } from '@middlewares/auth.middleware';
+import { authenticateUser, AuthRequest } from '@modules/auth/auth.middleware';
 import { Router } from 'express';
 
 import { loginSchema, refreshSchema } from './auth.schema';
