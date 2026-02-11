@@ -1,5 +1,6 @@
 import 'dotenv/config';
 
+import { initSocket } from '@lib/socket';
 import cors from 'cors';
 import express from 'express';
 import http from 'http';
@@ -8,7 +9,6 @@ import { appConfig } from './config/app';
 import authController from './modules/auth/auth.controller';
 import privateConversationController from './modules/private-conversation/private-conversation.controller';
 import privateMessageController from './modules/private-message/private-message.controller';
-import { initSocket } from '@lib/socket';
 
 const app = express();
 const { port } = appConfig;

@@ -1,6 +1,7 @@
 import prisma from '@lib/prisma';
-import { CreatePrivateMessageValues } from './private-message.types';
+
 import { PrivateMessage } from './private-message.model';
+import { CreatePrivateMessageValues } from './private-message.types';
 
 export const storePrivateMessage = async (
     data: CreatePrivateMessageValues,
@@ -13,4 +14,4 @@ export const storePrivateMessage = async (
             senderId: senderId,
         },
     });
-}
+};

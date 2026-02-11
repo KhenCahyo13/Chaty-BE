@@ -1,9 +1,10 @@
-import { authenticateUser, AuthRequest } from '@modules/auth/auth.middleware';
-import { Router } from 'express';
-import { createPrivateMessageSchema } from './private-message.schema';
+import { toHttpError } from '@lib/http-error';
 import { errorResponse, successResponse } from '@lib/response';
 import { mapZodIssues } from '@lib/validation-error';
-import { toHttpError } from '@lib/http-error';
+import { authenticateUser, AuthRequest } from '@modules/auth/auth.middleware';
+import { Router } from 'express';
+
+import { createPrivateMessageSchema } from './private-message.schema';
 import { createPrivateMessage } from './private-message.service';
 
 const router = Router();

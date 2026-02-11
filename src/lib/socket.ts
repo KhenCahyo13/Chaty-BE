@@ -1,5 +1,5 @@
+import http from 'http';
 import { Server } from 'socket.io';
-import http from "http";
 
 export let io: Server;
 
@@ -8,7 +8,7 @@ export const initSocket = (server: http.Server) => {
         cors: {
             origin: ['http://localhost:5173'],
             credentials: true,
-        }
+        },
     });
 
     io.on('connection', (socket) => {
@@ -27,4 +27,4 @@ export const initSocket = (server: http.Server) => {
             socket.leave(`user:${userId}`);
         });
     });
-}
+};
