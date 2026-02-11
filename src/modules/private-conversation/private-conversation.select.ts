@@ -18,6 +18,7 @@ export const userListSelect = {
 export const lastMessageListSelect = {
     id: true,
     content: true,
+    senderId: true,
     isDeleted: true,
     createdAt: true,
 } as const;
