@@ -15,6 +15,11 @@ export const findAllUsers = async (
             OR: [
                 { username: { contains: search, mode: 'insensitive' } },
                 { email: { contains: search, mode: 'insensitive' } },
+                {
+                    profile: {
+                        fullName: { contains: search, mode: 'insensitive' },
+                    },
+                },
             ],
         },
         select: listUsersSelect,
