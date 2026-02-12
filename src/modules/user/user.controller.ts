@@ -9,7 +9,7 @@ const router = Router();
 
 router.get('', authenticateUser, async (req, res) => {
     try {
-        const { limit, search, cursor } = req.query;
+        const { cursor, limit, search } = req.query;
         const { userId } = (req as AuthRequest).auth;
 
         const result = await getAllUsers(
@@ -25,7 +25,7 @@ router.get('', authenticateUser, async (req, res) => {
             })
         );
     } catch (error) {
-        const { statusCode, message, errors } = toHttpError(error);
+        const { errors, message, statusCode } = toHttpError(error);
         return res.status(statusCode).json(errorResponse(message, errors));
     }
 });

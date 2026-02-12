@@ -47,8 +47,8 @@ export const createPrivateMessage = async (
     ]);
 
     const socketPayload: SocketPrivateMessageCreatedPayload = {
-        private_conversation_id: createdMessage.privateConversationId,
         message: formattedMessage,
+        private_conversation_id: createdMessage.privateConversationId,
     };
 
     io.to(`user:${senderId}`).emit('private-message:sent', socketPayload);
@@ -63,7 +63,6 @@ export const createPrivateMessage = async (
         if (receiverTokens.length) {
             try {
                 await sendFcmNotificationToTokens(receiverTokens, {
-                    title: `New message from ${senderName}`,
                     body: formattedMessage.content ?? '(Deleted message)',
                     data: {
                         private_conversation_id:
@@ -71,6 +70,7 @@ export const createPrivateMessage = async (
                         private_message_id: createdMessage.id,
                         sender_id: senderId,
                     },
+                    title: `New message from ${senderName}`,
                 });
             } catch {
                 // Ignore FCM errors

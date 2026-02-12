@@ -7,10 +7,10 @@ import type { AuthTokens } from './auth.types';
 const refreshTokenStore = new Map<string, string>();
 
 const {
-    accessTokenSecret,
-    refreshTokenSecret,
     accessTokenExpiresIn,
+    accessTokenSecret,
     refreshTokenExpiresIn,
+    refreshTokenSecret,
 } = jwtConfig;
 
 export const buildAccessToken = (userId: string, username?: string): string =>
@@ -28,9 +28,9 @@ export const createAuthError = (
     statusCode = 401,
     errors?: unknown
 ): HttpError => ({
-    statusCode,
-    message,
     errors,
+    message,
+    statusCode,
 });
 
 export const storeRefreshToken = (

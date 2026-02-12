@@ -1,26 +1,26 @@
 // List Select
 export const profileListSelect = {
-    id: true,
-    fullName: true,
     about: true,
     avatarUrl: true,
+    fullName: true,
+    id: true,
 } as const;
 
 export const userListSelect = {
-    id: true,
-    username: true,
     email: true,
+    id: true,
     profile: {
         select: profileListSelect,
     },
+    username: true,
 } as const;
 
 export const lastMessageListSelect = {
-    id: true,
     content: true,
-    senderId: true,
-    isDeleted: true,
     createdAt: true,
+    id: true,
+    isDeleted: true,
+    senderId: true,
 } as const;
 
 // Details Select

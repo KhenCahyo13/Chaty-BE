@@ -7,15 +7,15 @@ export type CreatePrivateMessageValues = z.infer<
 >;
 
 export interface SocketPrivateMessagePayload {
-    id: string;
-    content: string | null;
-    senderId: string;
-    isDeleted: boolean;
+    content: null | string;
     createdAt: Date;
+    id: string;
+    isDeleted: boolean;
     readsCount: number;
+    senderId: string;
 }
 
 export interface SocketPrivateMessageCreatedPayload {
-    private_conversation_id: string;
     message: SocketPrivateMessagePayload;
+    private_conversation_id: string;
 }

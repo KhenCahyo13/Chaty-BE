@@ -35,7 +35,7 @@ router.post('/login', async (req, res) => {
             })
         );
     } catch (error) {
-        const { statusCode, message, errors } = toHttpError(error);
+        const { errors, message, statusCode } = toHttpError(error);
         return res.status(statusCode).json(errorResponse(message, errors));
     }
 });
@@ -62,7 +62,7 @@ router.post('/refresh', async (req, res) => {
             })
         );
     } catch (error) {
-        const { statusCode, message, errors } = toHttpError(error);
+        const { errors, message, statusCode } = toHttpError(error);
         return res.status(statusCode).json(errorResponse(message, errors));
     }
 });
@@ -73,7 +73,7 @@ router.post('/logout', authenticateUser, async (req, res) => {
         await logout(userId);
         return res.json(successResponse('Logout successful.', null));
     } catch (error) {
-        const { statusCode, message, errors } = toHttpError(error);
+        const { errors, message, statusCode } = toHttpError(error);
         return res.status(statusCode).json(errorResponse(message, errors));
     }
 });
@@ -98,7 +98,7 @@ router.post('/push-token', authenticateUser, async (req, res) => {
             successResponse('Push token registered successfully.', result)
         );
     } catch (error) {
-        const { statusCode, message, errors } = toHttpError(error);
+        const { errors, message, statusCode } = toHttpError(error);
         return res.status(statusCode).json(errorResponse(message, errors));
     }
 });

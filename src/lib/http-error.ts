@@ -1,7 +1,7 @@
 export type HttpError = {
-    statusCode: number;
-    message: string;
     errors?: unknown;
+    message: string;
+    statusCode: number;
 };
 
 export const isHttpError = (error: unknown): error is HttpError =>
@@ -15,9 +15,9 @@ export const createHttpError = (
     statusCode: number,
     errors?: unknown
 ): HttpError => ({
-    statusCode,
-    message,
     errors: errors ?? null,
+    message,
+    statusCode,
 });
 
 export const toHttpError = (error: unknown): HttpError => {
@@ -26,8 +26,8 @@ export const toHttpError = (error: unknown): HttpError => {
     }
 
     return {
-        statusCode: 500,
-        message: 'An internal server error occurred.',
         errors: null,
+        message: 'An internal server error occurred.',
+        statusCode: 500,
     };
 };

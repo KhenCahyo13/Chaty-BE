@@ -33,7 +33,7 @@ router.post('', authenticateUser, async (req, res) => {
             )
         );
     } catch (error) {
-        const { statusCode, message, errors } = toHttpError(error);
+        const { errors, message, statusCode } = toHttpError(error);
         return res.status(statusCode).json(errorResponse(message, errors));
     }
 });

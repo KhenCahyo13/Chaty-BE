@@ -12,8 +12,8 @@ export const storePrivateMessageReads = async (
     await prisma.privateMessageRead.createMany({
         data: messageIds.map((messageId) => ({
             messageId,
-            receiverId,
             readAt,
+            receiverId,
         })),
         skipDuplicates: true,
     });

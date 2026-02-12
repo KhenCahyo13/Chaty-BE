@@ -3,12 +3,12 @@ import { createClient, type RedisClientType } from 'redis';
 
 const CACHE_NAMESPACE = 'dev-chaty';
 
-let redisClient: RedisClientType | null = null;
-let connectPromise: Promise<RedisClientType | undefined> | null = null;
+let redisClient: null | RedisClientType = null;
+let connectPromise: null | Promise<RedisClientType | undefined> = null;
 
 const buildNamespacedKey = (key: string): string => `${CACHE_NAMESPACE}:${key}`;
 
-const getRedisClient = (): RedisClientType | null => {
+const getRedisClient = (): null | RedisClientType => {
     if (!redisConfig.url) {
         return null;
     }
@@ -24,7 +24,7 @@ const getRedisClient = (): RedisClientType | null => {
     return redisClient;
 };
 
-const getConnectedRedisClient = async (): Promise<RedisClientType | null> => {
+const getConnectedRedisClient = async (): Promise<null | RedisClientType> => {
     const client = getRedisClient();
 
     if (!client) {
@@ -49,7 +49,7 @@ const getConnectedRedisClient = async (): Promise<RedisClientType | null> => {
     return client.isOpen ? client : null;
 };
 
-export const getCache = async <T>(key: string): Promise<T | null> => {
+export const getCache = async <T>(key: string): Promise<null | T> => {
     try {
         const client = await getConnectedRedisClient();
         if (!client) {
@@ -93,8 +93,8 @@ export const deleteCacheByPatterns = async (
 
         for (const pattern of patterns) {
             for await (const keys of client.scanIterator({
-                MATCH: buildNamespacedKey(pattern),
                 COUNT: 100,
+                MATCH: buildNamespacedKey(pattern),
             })) {
                 for (const key of keys) {
                     await client.del(key);

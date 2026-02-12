@@ -34,9 +34,9 @@ export const buildSupabaseStoragePublicUrl = (
 };
 
 export const extractSupabaseStorageObjectPath = (
-    url: string | null | undefined,
+    url: null | string | undefined,
     bucket: string
-): string | null => {
+): null | string => {
     if (!url) {
         return null;
     }
@@ -61,9 +61,9 @@ export const extractSupabaseStorageObjectPath = (
 };
 
 export const resolveSupabaseStorageObjectPath = (
-    value: string | null | undefined,
+    value: null | string | undefined,
     bucket: string
-): string | null => {
+): null | string => {
     if (!value) {
         return null;
     }

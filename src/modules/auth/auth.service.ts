@@ -39,15 +39,15 @@ export const login = async (
     storeRefreshToken(refreshToken, user.id);
 
     const safeUser = {
+        email: user.email,
         id: user.id,
         username: user.username,
-        email: user.email,
     };
 
     return {
-        user: safeUser,
         access_token: accessToken,
         refresh_token: refreshToken,
+        user: safeUser,
     };
 };
 

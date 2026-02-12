@@ -21,8 +21,8 @@ export const mapProfileAvatarToSignedUrl = async (
 
     const signedUrl = await createSignedUrl({
         bucket: AVATAR_BUCKET,
-        path: avatarPath,
         expiresIn: AVATAR_SIGNED_URL_EXPIRES_IN,
+        path: avatarPath,
     });
 
     return {

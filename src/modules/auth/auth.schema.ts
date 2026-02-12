@@ -1,8 +1,8 @@
 import { z } from 'zod';
 
 export const loginSchema = z.object({
-    username: z.string().min(1, 'Username is required.'),
     password: z.string().min(1, 'Password is required.'),
+    username: z.string().min(1, 'Username is required.'),
 });
 
 export const refreshSchema = z.object({
@@ -10,7 +10,7 @@ export const refreshSchema = z.object({
 });
 
 export const registerPushTokenSchema = z.object({
+    device_id: z.string().max(255).optional(),
     fcm_token: z.string().min(1, 'FCM token is required.'),
     platform: z.enum(['ios', 'android', 'web']),
-    device_id: z.string().max(255).optional(),
 });

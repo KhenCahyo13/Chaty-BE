@@ -33,7 +33,7 @@ export const authenticateUser = (
         (req as AuthRequest).auth = payload;
         next();
     } catch (error) {
-        const { statusCode, message, errors } = toHttpError(error);
+        const { errors, message, statusCode } = toHttpError(error);
         res.status(statusCode).json(errorResponse(message, errors));
     }
 };

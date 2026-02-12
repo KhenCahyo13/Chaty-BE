@@ -1,9 +1,9 @@
 import { HttpError } from '@lib/http-error';
 
 export type AuthUser = {
+    email: string;
     id: string;
     username: string;
-    email: string;
 };
 
 export type AuthTokens = {
@@ -20,17 +20,17 @@ export type RefreshResult = AuthTokens & {
 };
 
 export type RegisterPushTokenInput = {
-    fcm_token: string;
-    platform: 'ios' | 'android' | 'web';
     device_id?: string;
+    fcm_token: string;
+    platform: 'android' | 'ios' | 'web';
 };
 
 export type AuthError = HttpError;
 
 export type FcmNotificationPayload = {
-    title: string;
     body: string;
     data?: Record<string, string>;
+    title: string;
 };
 
 export type GoogleOAuthTokenResponse = {

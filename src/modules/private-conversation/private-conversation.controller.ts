@@ -24,7 +24,7 @@ const router = Router();
 router.get('', authenticateUser, async (req, res) => {
     try {
         const { userId } = (req as AuthRequest).auth;
-        const { limit, search, cursor } = req.query;
+        const { cursor, limit, search } = req.query;
         const result = await findAllPrivateConversationsByUserId(
             limit ? parseInt(limit as string, 10) : 10,
             search as string | undefined,
@@ -42,7 +42,7 @@ router.get('', authenticateUser, async (req, res) => {
             )
         );
     } catch (error) {
-        const { statusCode, message, errors } = toHttpError(error);
+        const { errors, message, statusCode } = toHttpError(error);
         return res.status(statusCode).json(errorResponse(message, errors));
     }
 });
@@ -63,7 +63,7 @@ router.get('/:id', authenticateUser, async (req, res) => {
             )
         );
     } catch (error) {
-        const { statusCode, message, errors } = toHttpError(error);
+        const { errors, message, statusCode } = toHttpError(error);
         return res.status(statusCode).json(errorResponse(message, errors));
     }
 });
@@ -71,7 +71,7 @@ router.get('/:id', authenticateUser, async (req, res) => {
 router.get('/:id/messages', authenticateUser, async (req, res) => {
     try {
         const { id } = req.params;
-        const { limit, cursor } = req.query;
+        const { cursor, limit } = req.query;
         const { userId } = (req as AuthRequest).auth;
 
         const result = await getPrivateConversationMessagesById(
@@ -91,7 +91,7 @@ router.get('/:id/messages', authenticateUser, async (req, res) => {
             )
         );
     } catch (error) {
-        const { statusCode, message, errors } = toHttpError(error);
+        const { errors, message, statusCode } = toHttpError(error);
         return res.status(statusCode).json(errorResponse(message, errors));
     }
 });
@@ -123,7 +123,7 @@ router.post('', authenticateUser, async (req, res) => {
             )
         );
     } catch (error) {
-        const { statusCode, message, errors } = toHttpError(error);
+        const { errors, message, statusCode } = toHttpError(error);
         return res.status(statusCode).json(errorResponse(message, errors));
     }
 });
@@ -159,7 +159,7 @@ router.post('/:id/read', authenticateUser, async (req, res) => {
             })
         );
     } catch (error) {
-        const { statusCode, message, errors } = toHttpError(error);
+        const { errors, message, statusCode } = toHttpError(error);
         return res.status(statusCode).json(errorResponse(message, errors));
     }
 });

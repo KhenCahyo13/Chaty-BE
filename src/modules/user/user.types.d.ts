@@ -1,18 +1,18 @@
 export type UserAuthRecord = {
-    id: string;
-    username: string;
     email: string;
+    id: string;
     password: string;
+    username: string;
 };
 
 export interface UserListResponse {
-    id: string;
-    username: string;
     email: string;
-    profile: {
-        id: string;
+    id: string;
+    profile: null | {
+        about: null | string;
+        avatarUrl: null | string;
         fullName: string;
-        about: string | null;
-        avatarUrl: string | null;
-    } | null;
+        id: string;
+    };
+    username: string;
 }

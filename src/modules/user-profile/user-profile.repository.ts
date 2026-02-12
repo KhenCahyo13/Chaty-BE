@@ -3,25 +3,25 @@ import prisma from '@lib/prisma';
 export const upsertUserProfile = async (
     userId: string,
     payload: {
+        about: null | string;
+        avatarUrl: null | string;
         fullName: string;
-        about: string | null;
-        avatarUrl: string | null;
     }
 ) => {
     return prisma.userProfile.upsert({
-        where: {
-            userId,
-        },
         create: {
-            userId,
-            fullName: payload.fullName,
             about: payload.about,
             avatarUrl: payload.avatarUrl,
+            fullName: payload.fullName,
+            userId,
         },
         update: {
-            fullName: payload.fullName,
             about: payload.about,
             avatarUrl: payload.avatarUrl,
+            fullName: payload.fullName,
+        },
+        where: {
+            userId,
         },
     });
 };

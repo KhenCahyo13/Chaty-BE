@@ -1,7 +1,7 @@
 export const registerPushTokenSelect = {
-    id: true,
-    platform: true,
     deviceId: true,
+    id: true,
     isActive: true,
     lastSeenAt: true,
+    platform: true,
 } as const;

@@ -34,7 +34,7 @@ export const getAllPrivateConversationsByUserId = async (
     cursor?: string
 ): Promise<{
     conversations: PrivateConversationListItem[];
-    nextCursor: string | null;
+    nextCursor: null | string;
 }> => {
     return await findAllPrivateConversationsByUserId(
         limit,
@@ -79,7 +79,7 @@ export const getPrivateConversationMessagesById = async (
 
 export const createPrivateConversation = async (
     data: CreatePrivateConversationPayload
-): Promise<PrivateConversation | null> => {
+): Promise<null | PrivateConversation> => {
     if (data.user1Id === data.user2Id) {
         throw createHttpError(
             'Cannot create a private conversation with yourself.',
@@ -152,10 +152,10 @@ export const markPrivateConversationAsRead = async (
 
     if (messageIds.length) {
         const socketPayload: SocketPrivateMessageReadPayload = {
-            privateConversationId: id,
-            readerId: userId,
             messageIds: messageIds,
+            privateConversationId: id,
             readAt: readAt,
+            readerId: userId,
         };
 
         io.to(`user:${receiverId}`).emit('private-message:read', socketPayload);

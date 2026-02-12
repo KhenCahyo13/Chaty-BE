@@ -25,7 +25,7 @@ export const findAllPrivateConversationsByUserId = async (
     cursor?: string
 ): Promise<{
     conversations: PrivateConversationListItem[];
-    nextCursor: string | null;
+    nextCursor: null | string;
 }> => {
     const cacheKey = buildPrivateConversationListCacheKey(
         userId,
@@ -35,7 +35,7 @@ export const findAllPrivateConversationsByUserId = async (
     );
     const cached = await getCache<{
         conversations: PrivateConversationListItem[];
-        nextCursor: string | null;
+        nextCursor: null | string;
     }>(cacheKey);
 
     if (cached) {
@@ -43,16 +43,53 @@ export const findAllPrivateConversationsByUserId = async (
     }
 
     const conversations = await prisma.privateConversation.findMany({
-        take: limit,
         orderBy: {
             createdAt: 'desc',
         },
+        take: limit,
         ...(cursor && {
             cursor: { id: cursor },
             skip: 1,
         }),
+        include: {
+            _count: {
+                select: {
+                    messages: {
+                        where: {
+                            reads: {
+                                none: {
+                                    receiverId: userId,
+                                },
+                            },
+                            senderId: {
+                                not: userId,
+                            },
+                        },
+                    },
+                },
+            },
+            messages: {
+                orderBy: {
+                    createdAt: 'desc',
+                },
+                select: {
+                    ...lastMessageListSelect,
+                    _count: {
+                        select: {
+                            reads: true,
+                        },
+                    },
+                },
+                take: 1,
+            },
+            user1: {
+                select: userListSelect,
+            },
+            user2: {
+                select: userListSelect,
+            },
+        },
         where: {
-            OR: [{ user1Id: userId }, { user2Id: userId }],
             AND: [
                 {
                     OR: [
@@ -98,44 +135,7 @@ export const findAllPrivateConversationsByUserId = async (
             messages: {
                 some: {},
             },
-        },
-        include: {
-            user1: {
-                select: userListSelect,
-            },
-            user2: {
-                select: userListSelect,
-            },
-            _count: {
-                select: {
-                    messages: {
-                        where: {
-                            senderId: {
-                                not: userId,
-                            },
-                            reads: {
-                                none: {
-                                    receiverId: userId,
-                                },
-                            },
-                        },
-                    },
-                },
-            },
-            messages: {
-                take: 1,
-                orderBy: {
-                    createdAt: 'desc',
-                },
-                select: {
-                    ...lastMessageListSelect,
-                    _count: {
-                        select: {
-                            reads: true,
-                        },
-                    },
-                },
-            },
+            OR: [{ user1Id: userId }, { user2Id: userId }],
         },
     });
 
@@ -150,20 +150,20 @@ export const findAllPrivateConversationsByUserId = async (
 
                   return {
                       ...message,
+                      content: message.isDeleted ? null : message.content,
                       isMe: message.senderId === userId,
                       isRead: _count.reads > 0,
-                      content: message.isDeleted ? null : message.content,
                   };
               })()
             : null;
 
         return {
-            id: conversation.id,
             createdAt: conversation.createdAt,
-            updatedAt: conversation.updatedAt,
-            sender,
+            id: conversation.id,
             lastMessage,
+            sender,
             unreadMessageCount: conversation._count.messages,
+            updatedAt: conversation.updatedAt,
         };
     });
 
@@ -185,10 +185,10 @@ export const findPrivateConversationDetailsById = async (
 ) => {
     const cacheKey = buildPrivateConversationDetailsCacheKey(id, userId);
     const cached = await getCache<{
-        id: string;
         createdAt: Date;
-        updatedAt: Date;
+        id: string;
         receiver: Record<string, unknown>;
+        updatedAt: Date;
     }>(cacheKey);
 
     if (cached) {
@@ -196,10 +196,6 @@ export const findPrivateConversationDetailsById = async (
     }
 
     const conversation = await prisma.privateConversation.findFirst({
-        where: {
-            id: id,
-            OR: [{ user1Id: userId }, { user2Id: userId }],
-        },
         include: {
             user1: {
                 select: userListSelect,
@@ -208,6 +204,10 @@ export const findPrivateConversationDetailsById = async (
                 select: userListSelect,
             },
         },
+        where: {
+            id: id,
+            OR: [{ user1Id: userId }, { user2Id: userId }],
+        },
     });
 
     if (!conversation) {
@@ -215,13 +215,13 @@ export const findPrivateConversationDetailsById = async (
     }
 
     const result = {
-        id: conversation.id,
         createdAt: conversation.createdAt,
-        updatedAt: conversation.updatedAt,
+        id: conversation.id,
         receiver:
             conversation.user1Id === userId
                 ? conversation.user2
                 : conversation.user1,
+        updatedAt: conversation.updatedAt,
     };
 
     await setCache(cacheKey, result);
@@ -243,14 +243,14 @@ export const findPrivateConversationMessagesById = async (
     );
     const cached = await getCache<{
         messages: Array<{
-            id: string;
-            content: string | null;
-            isMe: boolean;
-            isDeleted: boolean;
-            isRead: boolean;
+            content: null | string;
             createdAt: Date;
+            id: string;
+            isDeleted: boolean;
+            isMe: boolean;
+            isRead: boolean;
         }>;
-        nextCursor: string | null;
+        nextCursor: null | string;
     }>(cacheKey);
 
     if (cached) {
@@ -258,10 +258,6 @@ export const findPrivateConversationMessagesById = async (
     }
 
     const conversation = await prisma.privateConversation.findFirst({
-        where: {
-            id: id,
-            OR: [{ user1Id: userId }, { user2Id: userId }],
-        },
         include: {
             messages: {
                 orderBy: { createdAt: 'desc' },
@@ -278,6 +274,10 @@ export const findPrivateConversationMessagesById = async (
                 },
             },
         },
+        where: {
+            id: id,
+            OR: [{ user1Id: userId }, { user2Id: userId }],
+        },
     });
 
     if (!conversation) {
@@ -288,12 +288,12 @@ export const findPrivateConversationMessagesById = async (
         const { _count, ...msg } = message;
 
         return {
-            id: msg.id,
             content: msg.isDeleted ? null : msg.content,
-            isMe: msg.senderId === userId,
-            isDeleted: msg.isDeleted,
-            isRead: msg.senderId === userId ? _count.reads > 0 : true,
             createdAt: msg.createdAt,
+            id: msg.id,
+            isDeleted: msg.isDeleted,
+            isMe: msg.senderId === userId,
+            isRead: msg.senderId === userId ? _count.reads > 0 : true,
         };
     });
 
@@ -309,12 +309,12 @@ export const findPrivateConversationMessagesById = async (
 
 export const findPrivateConversationUserIdsById = async (
     id: string
-): Promise<Partial<PrivateConversation> | null> => {
+): Promise<null | Partial<PrivateConversation>> => {
     const conversation = await prisma.privateConversation.findUnique({
+        select: conversationUserIdsSelect,
         where: {
             id: id,
         },
-        select: conversationUserIdsSelect,
     });
 
     return conversation;
@@ -331,7 +331,7 @@ export const storePrivateConversation = async (
 export const checkPrivateConversationRoomExistence = async (
     user1Id: string,
     user2Id: string
-): Promise<PrivateConversation | null> => {
+): Promise<null | PrivateConversation> => {
     return await prisma.privateConversation.findFirst({
         where: {
             OR: [

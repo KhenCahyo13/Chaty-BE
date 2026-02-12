@@ -13,8 +13,8 @@ export const storePrivateMessage = async (
 ): Promise<PrivateMessage> => {
     return await prisma.privateMessage.create({
         data: {
-            privateConversationId: data.private_conversation_id,
             content: data.content,
+            privateConversationId: data.private_conversation_id,
             senderId: senderId,
         },
     });
@@ -24,12 +24,12 @@ export const formatPrivateMessageForSocket = async (
     messageId: string
 ): Promise<SocketPrivateMessagePayload> => {
     const message = await prisma.privateMessage.findUnique({
-        where: { id: messageId },
         include: {
             _count: {
                 select: { reads: true },
             },
         },
+        where: { id: messageId },
     });
 
     if (!message) {
@@ -37,26 +37,26 @@ export const formatPrivateMessageForSocket = async (
     }
 
     return {
-        id: message.id,
         content: message.isDeleted ? null : message.content,
-        senderId: message.senderId,
-        isDeleted: message.isDeleted,
         createdAt: message.createdAt,
+        id: message.id,
+        isDeleted: message.isDeleted,
         readsCount: message._count.reads,
+        senderId: message.senderId,
     };
 };
 
 export const findPrivateMessageInConversationById = async (
     messageId: string,
     conversationId: string
-): Promise<{ createdAt: Date } | null> => {
+): Promise<null | { createdAt: Date }> => {
     return await prisma.privateMessage.findFirst({
+        select: {
+            createdAt: true,
+        },
         where: {
             id: messageId,
             privateConversationId: conversationId,
-        },
-        select: {
-            createdAt: true,
         },
     });
 };
@@ -67,22 +67,22 @@ export const findUnreadPrivateMessageIdsInConversation = async (
     lastReadMessageCreatedAt: Date
 ): Promise<string[]> => {
     const unreadMessages = await prisma.privateMessage.findMany({
+        select: {
+            id: true,
+        },
         where: {
-            privateConversationId: conversationId,
-            senderId: {
-                not: receiverId,
-            },
             createdAt: {
                 lte: lastReadMessageCreatedAt,
             },
+            privateConversationId: conversationId,
             reads: {
                 none: {
                     receiverId,
                 },
             },
-        },
-        select: {
-            id: true,
+            senderId: {
+                not: receiverId,
+            },
         },
     });
 

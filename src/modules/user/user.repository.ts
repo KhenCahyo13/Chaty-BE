@@ -10,11 +10,11 @@ export const findAllUsers = async (
     limit: number,
     search: string,
     cursor?: string
-): Promise<{ users: UserListResponse[]; nextCursor: string | null }> => {
+): Promise<{ nextCursor: null | string; users: UserListResponse[] }> => {
     const cacheKey = buildUserListCacheKey(userId, limit, search, cursor);
     const cached = await getCache<{
+        nextCursor: null | string;
         users: UserListResponse[];
-        nextCursor: string | null;
     }>(cacheKey);
 
     if (cached) {
@@ -22,12 +22,13 @@ export const findAllUsers = async (
     }
 
     const users = await prisma.user.findMany({
-        take: limit,
         orderBy: { id: 'desc' },
+        take: limit,
         ...(cursor && {
             cursor: { id: cursor },
             skip: 1,
         }),
+        select: listUsersSelect,
         where: {
             id: { not: userId },
             OR: [
@@ -40,12 +41,11 @@ export const findAllUsers = async (
                 },
             ],
         },
-        select: listUsersSelect,
     });
 
     const result = {
-        users,
         nextCursor: users.length ? users[users.length - 1].id : null,
+        users,
     };
 
     await setCache(cacheKey, result);
@@ -55,21 +55,21 @@ export const findAllUsers = async (
 
 export const findUserByUsername = async (
     username: string
-): Promise<UserAuthRecord | null> => {
+): Promise<null | UserAuthRecord> => {
     return prisma.user.findUnique({
-        where: { username },
         select: {
-            id: true,
-            username: true,
             email: true,
+            id: true,
             password: true,
+            username: true,
         },
+        where: { username },
     });
 };
 
 export const findUserById = async (
     id: string
-): Promise<UserListResponse | null> => {
+): Promise<null | UserListResponse> => {
     const cacheKey = buildUserByIdCacheKey(id);
     const cached = await getCache<UserListResponse>(cacheKey);
 
@@ -78,8 +78,8 @@ export const findUserById = async (
     }
 
     const result = await prisma.user.findUnique({
-        where: { id },
         select: listUsersSelect,
+        where: { id },
     });
 
     if (result) {

@@ -6,6 +6,6 @@ export const getAllUsers = async (
     limit: number,
     search: string,
     cursor?: string
-): Promise<{ users: UserListResponse[]; nextCursor: string | null }> => {
+): Promise<{ nextCursor: null | string; users: UserListResponse[] }> => {
     return await findAllUsers(userId, limit, search, cursor);
 };

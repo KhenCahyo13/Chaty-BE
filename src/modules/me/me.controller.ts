@@ -20,7 +20,7 @@ router.get('', authenticateUser, async (req, res) => {
             successResponse('Users retrieved successfully.', result)
         );
     } catch (error) {
-        const { statusCode, message, errors } = toHttpError(error);
+        const { errors, message, statusCode } = toHttpError(error);
         return res.status(statusCode).json(errorResponse(message, errors));
     }
 });
@@ -43,16 +43,16 @@ router.patch('', authenticateUser, uploadAvatarMiddleware, async (req, res) => {
         const { userId } = (req as AuthRequest).auth;
 
         const result = await updateProfile(userId, {
-            fullName: parsed.data.fullName,
             about: parsed.data.about,
             avatarFile: req.file,
+            fullName: parsed.data.fullName,
         });
 
         return res.json(
             successResponse('Profile updated successfully.', result)
         );
     } catch (error) {
-        const { statusCode, message, errors } = toHttpError(error);
+        const { errors, message, statusCode } = toHttpError(error);
         return res.status(statusCode).json(errorResponse(message, errors));
     }
 });

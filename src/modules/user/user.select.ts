@@ -1,15 +1,15 @@
 export const profileListSelect = {
-    id: true,
-    fullName: true,
     about: true,
     avatarUrl: true,
+    fullName: true,
+    id: true,
 } as const;
 
 export const listUsersSelect = {
-    id: true,
-    username: true,
     email: true,
+    id: true,
     profile: {
         select: profileListSelect,
     },
+    username: true,
 };

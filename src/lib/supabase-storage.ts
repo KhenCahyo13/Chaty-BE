@@ -4,17 +4,17 @@ import { createHttpError } from './http-error';
 
 type UploadFileParams = {
     bucket: string;
-    path: string;
     file: UploadFileBody;
     options?: UploadFileOptions;
+    path: string;
 };
 
 type UploadFileWithBufferParams = {
     bucket: string;
-    path: string;
     buffer: Buffer;
-    contentType?: string;
     cacheControl?: string;
+    contentType?: string;
+    path: string;
     upsert?: boolean;
 };
 
@@ -25,9 +25,9 @@ type DeleteFileParams = {
 
 type CreateSignedUrlParams = {
     bucket: string;
-    path: string;
+    download?: boolean | string;
     expiresIn?: number;
-    download?: string | boolean;
+    path: string;
 };
 
 type UploadFileBody =
@@ -39,19 +39,19 @@ type UploadFileBody =
     | FormData
     | NodeJS.ReadableStream
     | ReadableStream<Uint8Array>
-    | URLSearchParams
-    | string;
+    | string
+    | URLSearchParams;
 
 type UploadFileOptions = {
     cacheControl?: string;
     contentType?: string;
-    upsert?: boolean;
     duplex?: string;
-    metadata?: Record<string, unknown>;
     headers?: Record<string, string>;
+    metadata?: Record<string, unknown>;
+    upsert?: boolean;
 };
 
-let supabaseClient: SupabaseClient | null = null;
+let supabaseClient: null | SupabaseClient = null;
 
 const getSupabaseClient = (): SupabaseClient => {
     if (supabaseClient) {
@@ -71,8 +71,8 @@ const getSupabaseClient = (): SupabaseClient => {
 
     supabaseClient = createClient(supabaseUrl, supabaseKey, {
         auth: {
-            persistSession: false,
             autoRefreshToken: false,
+            persistSession: false,
         },
     });
 
@@ -81,9 +81,9 @@ const getSupabaseClient = (): SupabaseClient => {
 
 export const uploadFile = async ({
     bucket,
-    path,
     file,
     options,
+    path,
 }: UploadFileParams) => {
     const supabase = getSupabaseClient();
     const { data, error } = await supabase.storage
@@ -103,21 +103,21 @@ export const uploadFile = async ({
 
 export const uploadFileWithBuffer = async ({
     bucket,
-    path,
     buffer,
-    contentType,
     cacheControl,
+    contentType,
+    path,
     upsert,
 }: UploadFileWithBufferParams) => {
     return uploadFile({
         bucket,
-        path,
         file: buffer,
         options: {
-            contentType,
             cacheControl,
+            contentType,
             upsert,
         },
+        path,
     });
 };
 
@@ -140,9 +140,9 @@ export const deleteFile = async ({ bucket, path }: DeleteFileParams) => {
 
 export const createSignedUrl = async ({
     bucket,
-    path,
-    expiresIn = 60 * 60,
     download,
+    expiresIn = 60 * 60,
+    path,
 }: CreateSignedUrlParams) => {
     const supabase = getSupabaseClient();
     const { data, error } = await supabase.storage

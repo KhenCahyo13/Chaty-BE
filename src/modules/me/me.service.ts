@@ -13,7 +13,7 @@ import { AVATAR_BUCKET, mapProfileAvatarToSignedUrl } from './me.helpers';
 
 export const getProfile = async (
     userId: string
-): Promise<UserListResponse | null> => {
+): Promise<null | UserListResponse> => {
     const user = await findUserById(userId);
 
     if (!user) {
@@ -26,9 +26,9 @@ export const getProfile = async (
 export const updateProfile = async (
     userId: string,
     payload: {
-        fullName: string;
-        about: string | null;
+        about: null | string;
         avatarFile?: Express.Multer.File;
+        fullName: string;
     }
 ): Promise<UserListResponse> => {
     const currentUser = await findUserById(userId);
@@ -50,9 +50,9 @@ export const updateProfile = async (
 
         await uploadFileWithBuffer({
             bucket: AVATAR_BUCKET,
-            path: avatarPath,
             buffer: payload.avatarFile.buffer,
             contentType: payload.avatarFile.mimetype,
+            path: avatarPath,
             upsert: false,
         });
 
@@ -73,9 +73,9 @@ export const updateProfile = async (
     }
 
     await upsertUserProfile(userId, {
-        fullName: payload.fullName,
         about: payload.about,
         avatarUrl: nextAvatarPath,
+        fullName: payload.fullName,
     });
 
     await invalidateUserCacheById(userId);

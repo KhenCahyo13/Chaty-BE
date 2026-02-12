@@ -1,14 +1,14 @@
 export type SuccessResponse<T, TMeta = null> = {
-    success: true;
-    message: string;
     data: T;
+    message: string;
     meta?: TMeta;
+    success: true;
 };
 
 export type ErrorResponse<E = unknown> = {
-    success: false;
-    message: string;
     errors?: E;
+    message: string;
+    success: false;
 };
 
 export const successResponse = <TData, TMeta = null>(
@@ -16,17 +16,17 @@ export const successResponse = <TData, TMeta = null>(
     data: TData,
     meta?: TMeta
 ): SuccessResponse<TData, TMeta> => ({
-    success: true,
-    message,
     data,
+    message,
     meta,
+    success: true,
 });
 
 export const errorResponse = <E>(
     message: string,
     errors?: E
 ): ErrorResponse<E> => ({
-    success: false,
-    message,
     errors,
+    message,
+    success: false,
 });

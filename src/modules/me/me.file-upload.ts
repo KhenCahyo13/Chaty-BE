@@ -10,10 +10,6 @@ const ALLOWED_IMAGE_EXTENSIONS = new Set(['.jpg', '.jpeg', '.png', '.webp']);
 const INVALID_AVATAR_FILE_ERROR_CODE = 'INVALID_AVATAR_FILE';
 
 const uploadAvatar = multer({
-    storage: multer.memoryStorage(),
-    limits: {
-        fileSize: MAX_AVATAR_SIZE_BYTES,
-    },
     fileFilter: (_req, file, callback) => {
         const extension = extname(file.originalname).toLowerCase();
         const isAllowedMimeType = file.mimetype.startsWith('image/');
@@ -26,6 +22,10 @@ const uploadAvatar = multer({
 
         callback(null, true);
     },
+    limits: {
+        fileSize: MAX_AVATAR_SIZE_BYTES,
+    },
+    storage: multer.memoryStorage(),
 });
 
 export const uploadAvatarMiddleware = (
@@ -43,7 +43,7 @@ export const uploadAvatarMiddleware = (
             error instanceof multer.MulterError &&
             error.code === 'LIMIT_FILE_SIZE'
         ) {
-            const { statusCode, message, errors } = toHttpError(
+            const { errors, message, statusCode } = toHttpError(
                 createHttpError('Maximum avatar size is 2MB.', 400)
             );
             res.status(statusCode).json(errorResponse(message, errors));
@@ -54,7 +54,7 @@ export const uploadAvatarMiddleware = (
             error instanceof Error &&
             error.message === INVALID_AVATAR_FILE_ERROR_CODE
         ) {
-            const { statusCode, message, errors } = toHttpError(
+            const { errors, message, statusCode } = toHttpError(
                 createHttpError(
                     'Avatar harus image dengan ekstensi: .jpg, .jpeg, .png, .webp.',
                     400
@@ -64,7 +64,7 @@ export const uploadAvatarMiddleware = (
             return;
         }
 
-        const { statusCode, message, errors } = toHttpError(error);
+        const { errors, message, statusCode } = toHttpError(error);
         res.status(statusCode).json(errorResponse(message, errors));
     });
 };

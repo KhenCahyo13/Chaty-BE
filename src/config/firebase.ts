@@ -8,7 +8,7 @@ const GOOGLE_OAUTH_TOKEN_URL = 'https://oauth2.googleapis.com/token';
 const GOOGLE_FCM_SCOPE = 'https://www.googleapis.com/auth/firebase.messaging';
 const GOOGLE_JWT_AUDIENCE = GOOGLE_OAUTH_TOKEN_URL;
 
-let tokenCache: { accessToken: string; expiresAtMs: number } | null = null;
+let tokenCache: null | { accessToken: string; expiresAtMs: number } = null;
 
 const getServiceAccountCredentials = () => {
     const clientEmail = process.env.FIREBASE_SERVICE_ACCOUNT_CLIENT_EMAIL;
@@ -23,7 +23,7 @@ const getServiceAccountCredentials = () => {
     return { clientEmail, privateKey, projectId };
 };
 
-const getGoogleAccessToken = async (): Promise<string | null> => {
+const getGoogleAccessToken = async (): Promise<null | string> => {
     const nowMs = Date.now();
     if (tokenCache && tokenCache.expiresAtMs > nowMs + 30_000) {
         return tokenCache.accessToken;
@@ -36,10 +36,10 @@ const getGoogleAccessToken = async (): Promise<string | null> => {
 
     const assertion = jwt.sign(
         {
-            iss: credentials.clientEmail,
-            sub: credentials.clientEmail,
             aud: GOOGLE_JWT_AUDIENCE,
+            iss: credentials.clientEmail,
             scope: GOOGLE_FCM_SCOPE,
+            sub: credentials.clientEmail,
         },
         credentials.privateKey,
         {
@@ -49,14 +49,14 @@ const getGoogleAccessToken = async (): Promise<string | null> => {
     );
 
     const response = await fetch(GOOGLE_OAUTH_TOKEN_URL, {
-        method: 'POST',
+        body: new URLSearchParams({
+            assertion,
+            grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
+        }),
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
         },
-        body: new URLSearchParams({
-            grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
-            assertion,
-        }),
+        method: 'POST',
     });
 
     if (!response.ok) {
@@ -89,21 +89,21 @@ const sendFcmMessage = async (
     await fetch(
         `https://fcm.googleapis.com/v1/projects/${credentials.projectId}/messages:send`,
         {
-            method: 'POST',
+            body: JSON.stringify({
+                message: {
+                    data: payload.data,
+                    notification: {
+                        body: payload.body,
+                        title: payload.title,
+                    },
+                    token,
+                },
+            }),
             headers: {
                 Authorization: `Bearer ${accessToken}`,
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({
-                message: {
-                    token,
-                    notification: {
-                        title: payload.title,
-                        body: payload.body,
-                    },
-                    data: payload.data,
-                },
-            }),
+            method: 'POST',
         }
     );
 };

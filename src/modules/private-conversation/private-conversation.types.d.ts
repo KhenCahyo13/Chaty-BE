@@ -21,10 +21,10 @@ export interface PrivateConversationReadReceiptResult {
 }
 
 export interface SocketPrivateMessageReadPayload {
-    privateConversationId: string;
-    readerId: string;
     messageIds: string[];
+    privateConversationId: string;
     readAt: Date;
+    readerId: string;
 }
 
 type UserPayload = Prisma.UserGetPayload<{ select: typeof userListSelect }>;
@@ -32,19 +32,19 @@ type LastMessagePayload = Prisma.PrivateMessageGetPayload<{
     select: typeof lastMessageListSelect;
 }>;
 export type LastMessageWithRedaction = Omit<LastMessagePayload, 'content'> & {
-    content: string | null;
+    content: null | string;
 };
 
 export type PrivateConversationWithRelations =
     Prisma.PrivateConversationGetPayload<{
         include: {
-            user1: { select: typeof userListSelect };
-            user2: { select: typeof userListSelect };
             messages: {
-                select: typeof lastMessageListSelect;
                 orderBy: { createdAt: 'desc' };
+                select: typeof lastMessageListSelect;
                 take: 1;
             };
+            user1: { select: typeof userListSelect };
+            user2: { select: typeof userListSelect };
         };
     }>;
 
@@ -52,7 +52,7 @@ export type PrivateConversationListItem = Omit<
     PrivateConversation,
     'user1Id' | 'user2Id'
 > & {
-    sender: UserPayload;
     lastMessage: LastMessageWithRedaction | null;
+    sender: UserPayload;
     unreadMessageCount: number;
 };
