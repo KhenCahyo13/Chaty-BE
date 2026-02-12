@@ -1,7 +1,14 @@
 import z from 'zod';
 
 export const createPrivateMessageSchema = z.object({
-    content: z.string().min(1, 'Message content cannot be empty.'),
+    content: z
+        .string()
+        .trim()
+        .optional()
+        .transform((value) =>
+            value === undefined || value === '' ? null : value
+        ),
+    message_type: z.enum(['AUDIO', 'TEXT']).default('TEXT'),
     private_conversation_id: z.uuid(
         'Invalid conversation id format. Must be a valid UUID.'
     ),

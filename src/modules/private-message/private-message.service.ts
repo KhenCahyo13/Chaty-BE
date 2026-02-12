@@ -1,5 +1,8 @@
 import { sendFcmNotificationToTokens } from '@config/firebase';
+import { buildStorageObjectPath } from '@lib/file-upload';
+import { createHttpError } from '@lib/http-error';
 import { io } from '@lib/socket';
+import { uploadFileWithBuffer } from '@lib/supabase-storage';
 import {
     invalidatePrivateConversationCacheByConversationId,
     invalidatePrivateConversationCacheByUserIds,
@@ -20,9 +23,50 @@ import {
 
 export const createPrivateMessage = async (
     data: CreatePrivateMessageValues,
-    senderId: string
+    senderId: string,
+    audioFile?: Express.Multer.File
 ): Promise<PrivateMessage> => {
-    const createdMessage = await storePrivateMessage(data, senderId);
+    const audioBucket = process.env.SUPABASE_STORAGE_AUDIO_BUCKET;
+    const messageType = audioFile ? 'AUDIO' : data.message_type;
+
+    if (!audioFile && messageType === 'AUDIO') {
+        throw createHttpError('Audio file is required for audio message.', 400);
+    }
+
+    if (!audioFile && messageType === 'TEXT' && !data.content) {
+        throw createHttpError('Message content cannot be empty.', 400);
+    }
+
+    let audioPath: string | undefined;
+
+    if (audioFile) {
+        if (!audioBucket) {
+            throw createHttpError(
+                'SUPABASE_STORAGE_AUDIO_BUCKET is not configured.',
+                500
+            );
+        }
+
+        audioPath = buildStorageObjectPath(senderId, audioFile.originalname);
+        await uploadFileWithBuffer({
+            bucket: audioBucket,
+            buffer: audioFile.buffer,
+            contentType: audioFile.mimetype,
+            path: audioPath,
+            upsert: false,
+        });
+    }
+
+    const createdMessage = await storePrivateMessage(
+        {
+            ...data,
+            content: messageType === 'TEXT' ? data.content : null,
+            message_type: messageType,
+        },
+        senderId,
+        audioFile,
+        audioPath
+    );
     const conversationUsersIds = await findPrivateConversationUserIdsById(
         createdMessage.privateConversationId
     );
@@ -63,7 +107,10 @@ export const createPrivateMessage = async (
         if (receiverTokens.length) {
             try {
                 await sendFcmNotificationToTokens(receiverTokens, {
-                    body: formattedMessage.content ?? '(Deleted message)',
+                    body:
+                        formattedMessage.messageType === 'AUDIO'
+                            ? 'Voice message'
+                            : (formattedMessage.content ?? '(Deleted message)'),
                     data: {
                         private_conversation_id:
                             createdMessage.privateConversationId,

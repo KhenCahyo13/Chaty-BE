@@ -1,5 +1,6 @@
 import prisma from '@lib/prisma';
 import { getCache, setCache } from '@lib/redis';
+import { createSignedUrl } from '@lib/supabase-storage';
 
 import {
     buildPrivateConversationDetailsCacheKey,
@@ -17,6 +18,10 @@ import {
     CreatePrivateConversationPayload,
     type PrivateConversationListItem,
 } from './private-conversation.types';
+
+const AUDIO_SIGNED_URL_EXPIRES_IN = Number(
+    process.env.SUPABASE_STORAGE_SIGNED_URL_EXPIRES_IN
+);
 
 export const findAllPrivateConversationsByUserId = async (
     limit: number,
@@ -235,6 +240,7 @@ export const findPrivateConversationMessagesById = async (
     limit: number,
     cursor?: string
 ) => {
+    const audioBucket = process.env.SUPABASE_STORAGE_AUDIO_BUCKET;
     const cacheKey = buildPrivateConversationMessagesCacheKey(
         id,
         userId,
@@ -243,12 +249,14 @@ export const findPrivateConversationMessagesById = async (
     );
     const cached = await getCache<{
         messages: Array<{
+            audioUrl: null | string;
             content: null | string;
             createdAt: Date;
             id: string;
             isDeleted: boolean;
             isMe: boolean;
             isRead: boolean;
+            messageType: 'AUDIO' | 'TEXT';
         }>;
         nextCursor: null | string;
     }>(cacheKey);
@@ -271,6 +279,15 @@ export const findPrivateConversationMessagesById = async (
                     _count: {
                         select: { reads: true },
                     },
+                    attachments: {
+                        orderBy: {
+                            id: 'asc',
+                        },
+                        select: {
+                            fileUrl: true,
+                        },
+                        take: 1,
+                    },
                 },
             },
         },
@@ -284,18 +301,34 @@ export const findPrivateConversationMessagesById = async (
         return null;
     }
 
-    const messages = conversation.messages.map((message) => {
-        const { _count, ...msg } = message;
+    const messages = await Promise.all(
+        conversation.messages.map(async (message) => {
+            const { _count, attachments, ...msg } = message;
+            const audioPath =
+                msg.messageType === 'AUDIO' ? attachments[0]?.fileUrl : null;
+            const audioUrl =
+                !msg.isDeleted && audioPath && audioBucket
+                    ? (
+                          await createSignedUrl({
+                              bucket: audioBucket,
+                              expiresIn: AUDIO_SIGNED_URL_EXPIRES_IN,
+                              path: audioPath,
+                          })
+                      ).signedUrl
+                    : null;
 
-        return {
-            content: msg.isDeleted ? null : msg.content,
-            createdAt: msg.createdAt,
-            id: msg.id,
-            isDeleted: msg.isDeleted,
-            isMe: msg.senderId === userId,
-            isRead: msg.senderId === userId ? _count.reads > 0 : true,
-        };
-    });
+            return {
+                audioUrl,
+                content: msg.isDeleted ? null : msg.content,
+                createdAt: msg.createdAt,
+                id: msg.id,
+                isDeleted: msg.isDeleted,
+                isMe: msg.senderId === userId,
+                isRead: msg.senderId === userId ? _count.reads > 0 : true,
+                messageType: msg.messageType,
+            };
+        })
+    );
 
     const result = {
         messages,

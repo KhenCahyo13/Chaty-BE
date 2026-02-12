@@ -7,10 +7,12 @@ export type CreatePrivateMessageValues = z.infer<
 >;
 
 export interface SocketPrivateMessagePayload {
+    audioUrl: null | string;
     content: null | string;
     createdAt: Date;
     id: string;
     isDeleted: boolean;
+    messageType: 'AUDIO' | 'TEXT';
     readsCount: number;
     senderId: string;
 }

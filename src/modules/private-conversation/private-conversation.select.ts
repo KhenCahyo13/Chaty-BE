@@ -20,6 +20,7 @@ export const lastMessageListSelect = {
     createdAt: true,
     id: true,
     isDeleted: true,
+    messageType: true,
     senderId: true,
 } as const;
 

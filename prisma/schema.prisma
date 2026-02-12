@@ -13,6 +13,11 @@ datasource db {
   provider = "postgresql"
 }
 
+enum MessageType {
+  TEXT
+  AUDIO
+}
+
 model User {
   id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   username  String   @unique @db.VarChar(100)
@@ -35,15 +40,15 @@ model User {
 }
 
 model UserPushToken {
-  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  userId    String   @map("user_id") @db.Uuid
-  fcmToken  String   @map("fcm_token") @db.Text
-  platform  String   @db.VarChar(20)
-  deviceId  String?  @map("device_id") @db.VarChar(255)
-  isActive  Boolean  @default(true) @map("is_active")
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId     String   @map("user_id") @db.Uuid
+  fcmToken   String   @map("fcm_token") @db.Text
+  platform   String   @db.VarChar(20)
+  deviceId   String?  @map("device_id") @db.VarChar(255)
+  isActive   Boolean  @default(true) @map("is_active")
   lastSeenAt DateTime @default(now()) @map("last_seen_at") @db.Timestamptz(6)
-  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt DateTime @default(now()) @map("updated_at") @db.Timestamptz(6)
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt  DateTime @default(now()) @map("updated_at") @db.Timestamptz(6)
 
   user User @relation(fields: [userId], references: [id], onUpdate: Cascade, onDelete: Cascade)
 
@@ -144,13 +149,14 @@ model GroupMessageAttachment {
 }
 
 model PrivateMessage {
-  id                    String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  privateConversationId String   @map("private_conversation_id") @db.Uuid
-  senderId              String   @map("sender_id") @db.Uuid
-  content               String   @db.Text
-  isDeleted             Boolean  @default(false) @map("is_deleted")
-  createdAt             DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt             DateTime @default(now()) @map("updated_at") @db.Timestamptz(6)
+  id                    String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  privateConversationId String      @map("private_conversation_id") @db.Uuid
+  senderId              String      @map("sender_id") @db.Uuid
+  messageType           MessageType @default(TEXT) @map("message_type")
+  content               String?     @db.Text
+  isDeleted             Boolean     @default(false) @map("is_deleted")
+  createdAt             DateTime    @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt             DateTime    @default(now()) @map("updated_at") @db.Timestamptz(6)
 
   conversation PrivateConversation        @relation(fields: [privateConversationId], references: [id], onUpdate: Cascade, onDelete: Cascade)
   sender       User                       @relation(fields: [senderId], references: [id], onUpdate: Cascade, onDelete: Cascade)
