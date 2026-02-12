@@ -1,3 +1,4 @@
+import { SUPABASE_STORAGE_AVATAR_BUCKET } from '@constants/storage';
 import {
     buildStorageObjectPath,
     resolveSupabaseStorageObjectPath,
@@ -9,7 +10,7 @@ import { findUserById } from '@modules/user/user.repository';
 import { UserListResponse } from '@modules/user/user.types';
 import { upsertUserProfile } from '@modules/user-profile/user-profile.repository';
 
-import { AVATAR_BUCKET, mapProfileAvatarToSignedUrl } from './me.helpers';
+import { mapProfileAvatarToSignedUrl } from './me.helpers';
 
 export const getProfile = async (
     userId: string
@@ -39,7 +40,7 @@ export const updateProfile = async (
 
     let nextAvatarPath = resolveSupabaseStorageObjectPath(
         currentUser.profile?.avatarUrl,
-        AVATAR_BUCKET
+        SUPABASE_STORAGE_AVATAR_BUCKET
     );
 
     if (payload.avatarFile) {
@@ -49,7 +50,7 @@ export const updateProfile = async (
         );
 
         await uploadFileWithBuffer({
-            bucket: AVATAR_BUCKET,
+            bucket: SUPABASE_STORAGE_AVATAR_BUCKET,
             buffer: payload.avatarFile.buffer,
             contentType: payload.avatarFile.mimetype,
             path: avatarPath,
@@ -61,7 +62,7 @@ export const updateProfile = async (
         if (oldAvatarPath && oldAvatarPath !== avatarPath) {
             try {
                 await deleteFile({
-                    bucket: AVATAR_BUCKET,
+                    bucket: SUPABASE_STORAGE_AVATAR_BUCKET,
                     path: oldAvatarPath,
                 });
             } catch {

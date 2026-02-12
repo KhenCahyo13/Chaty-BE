@@ -1,13 +1,12 @@
 import { extname } from 'node:path';
 
+import { INVALID_AVATAR_FILE_ERROR_CODE } from '@constants/error-codes';
+import { ALLOWED_IMAGE_EXTENSIONS } from '@constants/file';
+import { MAX_AVATAR_SIZE_BYTES } from '@constants/size';
 import { createHttpError, toHttpError } from '@lib/http-error';
 import { errorResponse } from '@lib/response';
 import { NextFunction, Request, Response } from 'express';
 import multer from 'multer';
-
-import { ALLOWED_IMAGE_EXTENSIONS } from '@constants/file';
-import { INVALID_AVATAR_FILE_ERROR_CODE } from '@constants/error-codes';
-import { MAX_AVATAR_SIZE_BYTES } from '@constants/size';
 
 const uploadAvatar = multer({
     fileFilter: (_req, file, callback) => {

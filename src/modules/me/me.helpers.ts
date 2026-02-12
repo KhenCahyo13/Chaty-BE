@@ -1,11 +1,10 @@
-import { resolveSupabaseStorageObjectPath } from '@lib/file-upload';
-import { createSignedUrl } from '@lib/supabase-storage';
-import { UserListResponse } from '@modules/user/user.types';
-
 import {
     SUPABASE_STORAGE_AVATAR_BUCKET,
     SUPABASE_STORAGE_SIGNED_URL_EXPIRES_IN,
 } from '@constants/storage';
+import { resolveSupabaseStorageObjectPath } from '@lib/file-upload';
+import { createSignedUrl } from '@lib/supabase-storage';
+import { UserListResponse } from '@modules/user/user.types';
 
 export const mapProfileAvatarToSignedUrl = async (
     user: UserListResponse

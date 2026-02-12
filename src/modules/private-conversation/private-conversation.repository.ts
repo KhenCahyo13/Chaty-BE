@@ -1,8 +1,7 @@
+import { SUPABASE_STORAGE_SIGNED_URL_EXPIRES_IN } from '@constants/storage';
 import prisma from '@lib/prisma';
 import { getCache, setCache } from '@lib/redis';
 import { createSignedUrl } from '@lib/supabase-storage';
-
-import { SUPABASE_STORAGE_SIGNED_URL_EXPIRES_IN } from '@constants/storage';
 
 import {
     buildPrivateConversationDetailsCacheKey,
@@ -314,8 +313,7 @@ export const findPrivateConversationMessagesById = async (
                     ? (
                           await createSignedUrl({
                               bucket: audioBucket,
-                              expiresIn:
-                                  SUPABASE_STORAGE_SIGNED_URL_EXPIRES_IN,
+                              expiresIn: SUPABASE_STORAGE_SIGNED_URL_EXPIRES_IN,
                               path: audioPath,
                           })
                       ).signedUrl

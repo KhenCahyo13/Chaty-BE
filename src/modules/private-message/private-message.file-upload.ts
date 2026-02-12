@@ -1,22 +1,21 @@
 import { extname } from 'node:path';
 
-import { createHttpError, toHttpError } from '@lib/http-error';
-import { errorResponse } from '@lib/response';
-import { NextFunction, Request, Response } from 'express';
-import multer from 'multer';
-
-import {
-    ALLOWED_AUDIO_EXTENSIONS,
-    ALLOWED_CHAT_FILE_EXTENSIONS,
-} from '@constants/file';
 import {
     INVALID_AUDIO_FILE_ERROR_CODE,
     INVALID_CHAT_FILE_ERROR_CODE,
 } from '@constants/error-codes';
 import {
+    ALLOWED_AUDIO_EXTENSIONS,
+    ALLOWED_CHAT_FILE_EXTENSIONS,
+} from '@constants/file';
+import {
     MAX_CHAT_FILE_SIZE_BYTES,
     MAX_CHAT_FILES_COUNT,
 } from '@constants/size';
+import { createHttpError, toHttpError } from '@lib/http-error';
+import { errorResponse } from '@lib/response';
+import { NextFunction, Request, Response } from 'express';
+import multer from 'multer';
 
 const uploadPrivateMessageFiles = multer({
     fileFilter: (_req, file, callback) => {
