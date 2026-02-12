@@ -9,6 +9,7 @@ import { appConfig } from './config/app';
 import authController from './modules/auth/auth.controller';
 import privateConversationController from './modules/private-conversation/private-conversation.controller';
 import privateMessageController from './modules/private-message/private-message.controller';
+import userController from './modules/user/user.controller';
 
 const app = express();
 const { port } = appConfig;
@@ -30,6 +31,7 @@ api.get('/', (_req, res) => {
 api.use('/auth', authController);
 api.use('/private-conversations', privateConversationController);
 api.use('/private-messages', privateMessageController);
+api.use('/users', userController);
 
 app.use('/api/v1', api);
 

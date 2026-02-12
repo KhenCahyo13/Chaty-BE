@@ -1,6 +1,27 @@
 import prisma from '@lib/prisma';
 
-import type { UserAuthRecord } from './user.types';
+import type { UserAuthRecord, UserListResponse } from './user.types';
+import { listUsersSelect } from './user.select';
+
+export const findAllUsers = async (
+    userId: string,
+    limit: number,
+    search: string
+): Promise<UserListResponse[]> => {
+    const users = await prisma.user.findMany({
+        take: limit,
+        where: {
+            id: { not: userId },
+            OR: [
+                { username: { contains: search, mode: 'insensitive' } },
+                { email: { contains: search, mode: 'insensitive' } },
+            ],
+        },
+        select: listUsersSelect,
+    });
+
+    return users;
+}
 
 export const findUserByUsername = async (
     username: string
