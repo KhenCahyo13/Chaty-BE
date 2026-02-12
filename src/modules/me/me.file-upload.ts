@@ -5,9 +5,9 @@ import { errorResponse } from '@lib/response';
 import { NextFunction, Request, Response } from 'express';
 import multer from 'multer';
 
-const MAX_AVATAR_SIZE_BYTES = 2 * 1024 * 1024;
-const ALLOWED_IMAGE_EXTENSIONS = new Set(['.jpg', '.jpeg', '.png', '.webp']);
-const INVALID_AVATAR_FILE_ERROR_CODE = 'INVALID_AVATAR_FILE';
+import { ALLOWED_IMAGE_EXTENSIONS } from '@constants/file';
+import { INVALID_AVATAR_FILE_ERROR_CODE } from '@constants/error-codes';
+import { MAX_AVATAR_SIZE_BYTES } from '@constants/size';
 
 const uploadAvatar = multer({
     fileFilter: (_req, file, callback) => {

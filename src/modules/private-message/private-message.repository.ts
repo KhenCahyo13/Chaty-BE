@@ -4,16 +4,14 @@ import { createHttpError } from '@lib/http-error';
 import prisma from '@lib/prisma';
 import { createSignedUrl } from '@lib/supabase-storage';
 
+import { SUPABASE_STORAGE_SIGNED_URL_EXPIRES_IN } from '@constants/storage';
+
 import { PrivateMessage } from './private-message.model';
 import {
     CreatePrivateMessageValues,
     SocketPrivateMessagePayload,
     StorePrivateMessageAttachmentInput,
 } from './private-message.types';
-
-const AUDIO_SIGNED_URL_EXPIRES_IN = Number(
-    process.env.SUPABASE_STORAGE_SIGNED_URL_EXPIRES_IN
-);
 
 export const storePrivateMessage = async (
     data: CreatePrivateMessageValues,
@@ -88,9 +86,9 @@ export const formatPrivateMessageForSocket = async (
     const audioUrl =
         !message.isDeleted && audioPath && audioBucket
             ? (
-                  await createSignedUrl({
+                      await createSignedUrl({
                       bucket: audioBucket,
-                      expiresIn: AUDIO_SIGNED_URL_EXPIRES_IN,
+                      expiresIn: SUPABASE_STORAGE_SIGNED_URL_EXPIRES_IN,
                       path: audioPath,
                   })
               ).signedUrl
@@ -102,7 +100,7 @@ export const formatPrivateMessageForSocket = async (
                       return (
                           await createSignedUrl({
                               bucket: filesBucket,
-                              expiresIn: AUDIO_SIGNED_URL_EXPIRES_IN,
+                              expiresIn: SUPABASE_STORAGE_SIGNED_URL_EXPIRES_IN,
                               path: filePath,
                           })
                       ).signedUrl;

@@ -5,39 +5,18 @@ import { errorResponse } from '@lib/response';
 import { NextFunction, Request, Response } from 'express';
 import multer from 'multer';
 
-const MAX_CHAT_FILE_SIZE_BYTES = 20 * 1024 * 1024;
-const MAX_CHAT_FILES_COUNT = 10;
-const ALLOWED_AUDIO_EXTENSIONS = new Set([
-    '.aac',
-    '.m4a',
-    '.mp3',
-    '.ogg',
-    '.wav',
-    '.webm',
-]);
-const ALLOWED_CHAT_FILE_EXTENSIONS = new Set([
-    '.bmp',
-    '.csv',
-    '.doc',
-    '.docx',
-    '.gif',
-    '.heic',
-    '.heif',
-    '.jpeg',
-    '.jpg',
-    '.ods',
-    '.odt',
-    '.pdf',
-    '.png',
-    '.ppt',
-    '.pptx',
-    '.txt',
-    '.webp',
-    '.xls',
-    '.xlsx',
-]);
-const INVALID_AUDIO_FILE_ERROR_CODE = 'INVALID_AUDIO_FILE';
-const INVALID_CHAT_FILE_ERROR_CODE = 'INVALID_CHAT_FILE';
+import {
+    ALLOWED_AUDIO_EXTENSIONS,
+    ALLOWED_CHAT_FILE_EXTENSIONS,
+} from '@constants/file';
+import {
+    INVALID_AUDIO_FILE_ERROR_CODE,
+    INVALID_CHAT_FILE_ERROR_CODE,
+} from '@constants/error-codes';
+import {
+    MAX_CHAT_FILE_SIZE_BYTES,
+    MAX_CHAT_FILES_COUNT,
+} from '@constants/size';
 
 const uploadPrivateMessageFiles = multer({
     fileFilter: (_req, file, callback) => {

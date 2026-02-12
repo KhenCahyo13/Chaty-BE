@@ -11,7 +11,8 @@
       "@modules/*": ["src/modules/*"],
       "@lib/*": ["src/lib/*"],
       "@middlewares/*": ["src/middlewares/*"],
-      "@config/*": ["src/config/*"]
+      "@config/*": ["src/config/*"],
+      "@constants/*": ["src/constants/*"]
     },
     "strict": true,
     "esModuleInterop": true,
