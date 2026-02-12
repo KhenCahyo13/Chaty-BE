@@ -18,9 +18,9 @@ import {
 import {
     CreatePrivateConversationPayload,
     MarkPrivateConversationAsReadValues,
+    type PrivateConversationListItem,
     PrivateConversationReadReceiptResult,
     SocketPrivateMessageReadPayload,
-    type PrivateConversationListItem,
 } from './private-conversation.types';
 
 export const getAllPrivateConversationsByUserId = async (

@@ -129,7 +129,9 @@ router.post('', authenticateUser, async (req, res) => {
 });
 
 router.post('/:id/read', authenticateUser, async (req, res) => {
-    const parsed = markPrivateConversationAsReadSchema.safeParse(req.body ?? {});
+    const parsed = markPrivateConversationAsReadSchema.safeParse(
+        req.body ?? {}
+    );
     if (!parsed.success) {
         return res
             .status(400)
