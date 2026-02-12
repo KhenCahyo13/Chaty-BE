@@ -11,6 +11,22 @@ export interface CreatePrivateConversationPayload {
     user2Id: string;
 }
 
+export interface MarkPrivateConversationAsReadValues {
+    last_read_message_id: string;
+}
+
+export interface PrivateConversationReadReceiptResult {
+    messageIds: string[];
+    readAt: Date;
+}
+
+export interface SocketPrivateMessageReadPayload {
+    privateConversationId: string;
+    readerId: string;
+    messageIds: string[];
+    readAt: Date;
+}
+
 type UserPayload = Prisma.UserGetPayload<{ select: typeof userListSelect }>;
 type LastMessagePayload = Prisma.PrivateMessageGetPayload<{
     select: typeof lastMessageListSelect;
@@ -38,4 +54,5 @@ export type PrivateConversationListItem = Omit<
 > & {
     sender: UserPayload;
     lastMessage: LastMessageWithRedaction | null;
+    unreadMessageCount: number;
 };

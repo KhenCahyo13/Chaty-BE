@@ -45,3 +45,46 @@ export const formatPrivateMessageForSocket = async (
         readsCount: message._count.reads,
     };
 };
+
+export const findPrivateMessageInConversationById = async (
+    messageId: string,
+    conversationId: string
+): Promise<{ createdAt: Date } | null> => {
+    return await prisma.privateMessage.findFirst({
+        where: {
+            id: messageId,
+            privateConversationId: conversationId,
+        },
+        select: {
+            createdAt: true,
+        },
+    });
+};
+
+export const findUnreadPrivateMessageIdsInConversation = async (
+    conversationId: string,
+    receiverId: string,
+    lastReadMessageCreatedAt: Date
+): Promise<string[]> => {
+    const unreadMessages = await prisma.privateMessage.findMany({
+        where: {
+            privateConversationId: conversationId,
+            senderId: {
+                not: receiverId,
+            },
+            createdAt: {
+                lte: lastReadMessageCreatedAt,
+            },
+            reads: {
+                none: {
+                    receiverId,
+                },
+            },
+        },
+        select: {
+            id: true,
+        },
+    });
+
+    return unreadMessages.map((message) => message.id);
+};

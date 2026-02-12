@@ -1,4 +1,10 @@
 import { createHttpError } from '@lib/http-error';
+import { io } from '@lib/socket';
+import {
+    findPrivateMessageInConversationById,
+    findUnreadPrivateMessageIdsInConversation,
+} from '@modules/private-message/private-message.repository';
+import { storePrivateMessageReads } from '@modules/private-message-read/private-message-read.repository';
 
 import { PrivateConversation } from './private-conversation.model';
 import {
@@ -6,10 +12,14 @@ import {
     findAllPrivateConversationsByUserId,
     findPrivateConversationDetailsById,
     findPrivateConversationMessagesById,
+    findPrivateConversationUserIdsById,
     storePrivateConversation,
 } from './private-conversation.repository';
 import {
     CreatePrivateConversationPayload,
+    MarkPrivateConversationAsReadValues,
+    PrivateConversationReadReceiptResult,
+    SocketPrivateMessageReadPayload,
     type PrivateConversationListItem,
 } from './private-conversation.types';
 
@@ -83,4 +93,57 @@ export const createPrivateConversation = async (
     }
 
     return await storePrivateConversation(data);
+};
+
+export const markPrivateConversationAsRead = async (
+    id: string,
+    userId: string,
+    data: MarkPrivateConversationAsReadValues
+): Promise<PrivateConversationReadReceiptResult> => {
+    const conversationUsersIds = await findPrivateConversationUserIdsById(id);
+
+    if (
+        !conversationUsersIds ||
+        (conversationUsersIds.user1Id !== userId &&
+            conversationUsersIds.user2Id !== userId)
+    ) {
+        throw createHttpError('Private conversation not found.', 404);
+    }
+
+    const lastReadMessage = await findPrivateMessageInConversationById(
+        data.last_read_message_id,
+        id
+    );
+    if (!lastReadMessage) {
+        throw createHttpError('Private message not found.', 404);
+    }
+
+    const messageIds = await findUnreadPrivateMessageIdsInConversation(
+        id,
+        userId,
+        lastReadMessage.createdAt
+    );
+    const readAt = new Date();
+    await storePrivateMessageReads(messageIds, userId, readAt);
+
+    const receiverId =
+        conversationUsersIds.user1Id === userId
+            ? conversationUsersIds.user2Id
+            : conversationUsersIds.user1Id;
+
+    if (messageIds.length) {
+        const socketPayload: SocketPrivateMessageReadPayload = {
+            privateConversationId: id,
+            readerId: userId,
+            messageIds: messageIds,
+            readAt: readAt,
+        };
+
+        io.to(`user:${receiverId}`).emit('private-message:read', socketPayload);
+    }
+
+    return {
+        messageIds,
+        readAt,
+    };
 };

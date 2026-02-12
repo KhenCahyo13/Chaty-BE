@@ -85,6 +85,22 @@ export const findAllPrivateConversationsByUserId = async (
             user2: {
                 select: userListSelect,
             },
+            _count: {
+                select: {
+                    messages: {
+                        where: {
+                            senderId: {
+                                not: userId,
+                            },
+                            reads: {
+                                none: {
+                                    receiverId: userId,
+                                },
+                            },
+                        },
+                    },
+                },
+            },
             messages: {
                 take: 1,
                 orderBy: {
@@ -94,11 +110,7 @@ export const findAllPrivateConversationsByUserId = async (
                     ...lastMessageListSelect,
                     _count: {
                         select: {
-                            reads: {
-                                where: {
-                                    receiverId: userId,
-                                },
-                            },
+                            reads: true,
                         },
                     },
                 },
@@ -130,6 +142,7 @@ export const findAllPrivateConversationsByUserId = async (
             updatedAt: conversation.updatedAt,
             sender,
             lastMessage,
+            unreadMessageCount: conversation._count.messages,
         };
     });
 
