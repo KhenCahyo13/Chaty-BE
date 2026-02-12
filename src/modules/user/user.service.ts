@@ -7,4 +7,4 @@ export const getAllUsers = async (
     search: string
 ): Promise<UserListResponse[]> => {
     return await findAllUsers(userId, limit, search);
-}
+};

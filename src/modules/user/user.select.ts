@@ -11,5 +11,5 @@ export const listUsersSelect = {
     email: true,
     profile: {
         select: profileListSelect,
-    }
-}
+    },
+};

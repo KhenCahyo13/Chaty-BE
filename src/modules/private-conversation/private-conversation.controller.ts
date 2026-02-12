@@ -41,7 +41,10 @@ router.get('/:id', authenticateUser, async (req, res) => {
     try {
         const { id } = req.params;
         const { userId } = (req as AuthRequest).auth;
-        const result = await getPrivateConversationDetailsById(id as string, userId);
+        const result = await getPrivateConversationDetailsById(
+            id as string,
+            userId
+        );
 
         return res.json(
             successResponse(

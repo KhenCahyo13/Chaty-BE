@@ -23,7 +23,6 @@ export const initSocket = (server: http.Server) => {
         socket.join(`user:${userId}`);
 
         socket.on('disconnect', () => {
-            console.log(`User ${userId} disconnected`);
             socket.leave(`user:${userId}`);
         });
     });

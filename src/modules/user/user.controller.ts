@@ -1,8 +1,9 @@
-import { Router } from 'express';
-import { getAllUsers } from './user.service';
-import { errorResponse, successResponse } from '@lib/response';
 import { toHttpError } from '@lib/http-error';
+import { errorResponse, successResponse } from '@lib/response';
 import { authenticateUser, AuthRequest } from '@modules/auth/auth.middleware';
+import { Router } from 'express';
+
+import { getAllUsers } from './user.service';
 
 const router = Router();
 
@@ -18,15 +19,12 @@ router.get('', authenticateUser, async (req, res) => {
         );
 
         return res.json(
-            successResponse(
-                'Users retrieved successfully.',
-                result
-            )
+            successResponse('Users retrieved successfully.', result)
         );
     } catch (error) {
         const { statusCode, message, errors } = toHttpError(error);
         return res.status(statusCode).json(errorResponse(message, errors));
     }
-})
+});
 
 export default router;

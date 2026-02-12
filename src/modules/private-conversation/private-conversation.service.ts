@@ -22,7 +22,7 @@ export const getAllPrivateConversationsByUserId = async (
 
 export const getPrivateConversationDetailsById = async (
     id: string,
-    userId: string,
+    userId: string
 ) => {
     const data = await findPrivateConversationDetailsById(id, userId);
 
@@ -51,7 +51,7 @@ export const getPrivateConversationMessagesById = async (
     }
 
     return data;
-}
+};
 
 export const createPrivateConversation = async (
     data: CreatePrivateConversationPayload

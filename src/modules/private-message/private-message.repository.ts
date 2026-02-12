@@ -1,9 +1,11 @@
+import { createHttpError } from '@lib/http-error';
 import prisma from '@lib/prisma';
 
 import { PrivateMessage } from './private-message.model';
-import { CreatePrivateMessageValues, SocketPrivateMessagePayload } from './private-message.types';
-import { createHttpError } from '@lib/http-error';
-import { LastMessageWithRedaction } from '@modules/private-conversation/private-conversation.types';
+import {
+    CreatePrivateMessageValues,
+    SocketPrivateMessagePayload,
+} from './private-message.types';
 
 export const storePrivateMessage = async (
     data: CreatePrivateMessageValues,

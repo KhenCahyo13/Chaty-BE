@@ -1,7 +1,7 @@
 import prisma from '@lib/prisma';
 
-import type { UserAuthRecord, UserListResponse } from './user.types';
 import { listUsersSelect } from './user.select';
+import type { UserAuthRecord, UserListResponse } from './user.types';
 
 export const findAllUsers = async (
     userId: string,
@@ -21,7 +21,7 @@ export const findAllUsers = async (
     });
 
     return users;
-}
+};
 
 export const findUserByUsername = async (
     username: string
