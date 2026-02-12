@@ -6,10 +6,16 @@ import type { UserAuthRecord, UserListResponse } from './user.types';
 export const findAllUsers = async (
     userId: string,
     limit: number,
-    search: string
-): Promise<UserListResponse[]> => {
+    search: string,
+    cursor?: string
+): Promise<{ users: UserListResponse[]; nextCursor: string | null }> => {
     const users = await prisma.user.findMany({
         take: limit,
+        orderBy: { id: 'desc' },
+        ...(cursor && {
+            cursor: { id: cursor },
+            skip: 1,
+        }),
         where: {
             id: { not: userId },
             OR: [
@@ -25,7 +31,10 @@ export const findAllUsers = async (
         select: listUsersSelect,
     });
 
-    return users;
+    return {
+        users,
+        nextCursor: users.length ? users[users.length - 1].id : null,
+    };
 };
 
 export const findUserByUsername = async (

@@ -9,17 +9,20 @@ const router = Router();
 
 router.get('', authenticateUser, async (req, res) => {
     try {
-        const { limit, search } = req.query;
+        const { limit, search, cursor } = req.query;
         const { userId } = (req as AuthRequest).auth;
 
         const result = await getAllUsers(
             userId,
             limit ? parseInt(limit as string, 10) : 20,
-            search ? (search as string) : ''
+            search ? (search as string) : '',
+            cursor as string | undefined
         );
 
         return res.json(
-            successResponse('Users retrieved successfully.', result)
+            successResponse('Users retrieved successfully.', result.users, {
+                nextCursor: result.nextCursor,
+            })
         );
     } catch (error) {
         const { statusCode, message, errors } = toHttpError(error);
