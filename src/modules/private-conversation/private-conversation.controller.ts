@@ -20,17 +20,21 @@ const router = Router();
 router.get('', authenticateUser, async (req, res) => {
     try {
         const { userId } = (req as AuthRequest).auth;
-        const { limit, search } = req.query;
+        const { limit, search, cursor } = req.query;
         const result = await findAllPrivateConversationsByUserId(
             limit ? parseInt(limit as string, 10) : 10,
             search as string | undefined,
-            userId
+            userId,
+            cursor as string | undefined
         );
 
         return res.json(
             successResponse(
                 'Private conversations retrieved successfully.',
-                result
+                result.conversations,
+                {
+                    nextCursor: result.nextCursor,
+                }
             )
         );
     } catch (error) {

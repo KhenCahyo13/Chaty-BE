@@ -15,10 +15,21 @@ import {
 export const findAllPrivateConversationsByUserId = async (
     limit: number,
     search: string | undefined,
-    userId: string
-): Promise<PrivateConversationListItem[]> => {
+    userId: string,
+    cursor?: string
+): Promise<{
+    conversations: PrivateConversationListItem[];
+    nextCursor: string | null;
+}> => {
     const conversations = await prisma.privateConversation.findMany({
         take: limit,
+        orderBy: {
+            createdAt: 'desc',
+        },
+        ...(cursor && {
+            cursor: { id: cursor },
+            skip: 1,
+        }),
         where: {
             OR: [{ user1Id: userId }, { user2Id: userId }],
             AND: [
@@ -95,7 +106,7 @@ export const findAllPrivateConversationsByUserId = async (
         },
     });
 
-    return conversations.map((conversation) => {
+    const mappedConversations = conversations.map((conversation) => {
         const sender =
             conversation.user1Id === userId
                 ? conversation.user2
@@ -121,6 +132,13 @@ export const findAllPrivateConversationsByUserId = async (
             lastMessage,
         };
     });
+
+    return {
+        conversations: mappedConversations,
+        nextCursor: mappedConversations.length
+            ? mappedConversations[mappedConversations.length - 1].id
+            : null,
+    };
 };
 
 export const findPrivateConversationDetailsById = async (
