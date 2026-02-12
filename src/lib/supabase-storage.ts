@@ -1,7 +1,4 @@
-import {
-    createClient,
-    type SupabaseClient,
-} from '@supabase/supabase-js';
+import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 
 import { createHttpError } from './http-error';
 
@@ -89,13 +86,16 @@ export const uploadFile = async ({
     options,
 }: UploadFileParams) => {
     const supabase = getSupabaseClient();
-    const { data, error } = await supabase
-        .storage
+    const { data, error } = await supabase.storage
         .from(bucket)
         .upload(path, file, options);
 
     if (error) {
-        throw createHttpError('Gagal upload file ke Supabase Storage.', 500, error);
+        throw createHttpError(
+            'Gagal upload file ke Supabase Storage.',
+            500,
+            error
+        );
     }
 
     return data;
@@ -128,7 +128,11 @@ export const deleteFile = async ({ bucket, path }: DeleteFileParams) => {
     const { data, error } = await supabase.storage.from(bucket).remove(paths);
 
     if (error) {
-        throw createHttpError('Gagal menghapus file di Supabase Storage.', 500, error);
+        throw createHttpError(
+            'Gagal menghapus file di Supabase Storage.',
+            500,
+            error
+        );
     }
 
     return data;
@@ -141,13 +145,16 @@ export const createSignedUrl = async ({
     download,
 }: CreateSignedUrlParams) => {
     const supabase = getSupabaseClient();
-    const { data, error } = await supabase
-        .storage
+    const { data, error } = await supabase.storage
         .from(bucket)
         .createSignedUrl(path, expiresIn, { download });
 
     if (error) {
-        throw createHttpError('Gagal membuat signed URL dari Supabase Storage.', 500, error);
+        throw createHttpError(
+            'Gagal membuat signed URL dari Supabase Storage.',
+            500,
+            error
+        );
     }
 
     return data;

@@ -11,5 +11,7 @@ export const updateMeProfileSchema = z.object({
         .trim()
         .max(100, 'About maximum 100 characters.')
         .optional()
-        .transform((value) => (value === undefined || value === '' ? null : value)),
+        .transform((value) =>
+            value === undefined || value === '' ? null : value
+        ),
 });

@@ -39,7 +39,10 @@ export const uploadAvatarMiddleware = (
             return;
         }
 
-        if (error instanceof multer.MulterError && error.code === 'LIMIT_FILE_SIZE') {
+        if (
+            error instanceof multer.MulterError &&
+            error.code === 'LIMIT_FILE_SIZE'
+        ) {
             const { statusCode, message, errors } = toHttpError(
                 createHttpError('Ukuran avatar maksimal 2MB.', 400)
             );

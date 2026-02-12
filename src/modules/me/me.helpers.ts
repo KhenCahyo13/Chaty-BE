@@ -3,7 +3,9 @@ import { createSignedUrl } from '@lib/supabase-storage';
 import { UserListResponse } from '@modules/user/user.types';
 
 export const AVATAR_BUCKET = process.env.SUPABASE_STORAGE_AVATAR_BUCKET!;
-export const AVATAR_SIGNED_URL_EXPIRES_IN = Number(process.env.SUPABASE_STORAGE_SIGNED_URL_EXPIRES_IN);
+export const AVATAR_SIGNED_URL_EXPIRES_IN = Number(
+    process.env.SUPABASE_STORAGE_SIGNED_URL_EXPIRES_IN
+);
 
 export const mapProfileAvatarToSignedUrl = async (
     user: UserListResponse

@@ -3,14 +3,12 @@ import {
     resolveSupabaseStorageObjectPath,
 } from '@lib/file-upload';
 import { createHttpError } from '@lib/http-error';
-import {
-    deleteFile,
-    uploadFileWithBuffer,
-} from '@lib/supabase-storage';
+import { deleteFile, uploadFileWithBuffer } from '@lib/supabase-storage';
 import { invalidateUserCacheById } from '@modules/user/user.cache';
 import { findUserById } from '@modules/user/user.repository';
 import { UserListResponse } from '@modules/user/user.types';
 import { upsertUserProfile } from '@modules/user-profile/user-profile.repository';
+
 import { AVATAR_BUCKET, mapProfileAvatarToSignedUrl } from './me.helpers';
 
 export const getProfile = async (
