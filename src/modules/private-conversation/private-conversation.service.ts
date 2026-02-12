@@ -6,6 +6,10 @@ import {
 } from '@modules/private-message/private-message.repository';
 import { storePrivateMessageReads } from '@modules/private-message-read/private-message-read.repository';
 
+import {
+    invalidatePrivateConversationCacheByConversationId,
+    invalidatePrivateConversationCacheByUserIds,
+} from './private-conversation.cache';
 import { PrivateConversation } from './private-conversation.model';
 import {
     checkPrivateConversationRoomExistence,
@@ -92,7 +96,14 @@ export const createPrivateConversation = async (
         return privateConversationRoom;
     }
 
-    return await storePrivateConversation(data);
+    const createdConversation = await storePrivateConversation(data);
+
+    await invalidatePrivateConversationCacheByUserIds([
+        createdConversation.user1Id,
+        createdConversation.user2Id,
+    ]);
+
+    return createdConversation;
 };
 
 export const markPrivateConversationAsRead = async (
@@ -130,6 +141,14 @@ export const markPrivateConversationAsRead = async (
         conversationUsersIds.user1Id === userId
             ? conversationUsersIds.user2Id
             : conversationUsersIds.user1Id;
+
+    await Promise.all([
+        invalidatePrivateConversationCacheByConversationId(id),
+        invalidatePrivateConversationCacheByUserIds([
+            userId,
+            receiverId as string,
+        ]),
+    ]);
 
     if (messageIds.length) {
         const socketPayload: SocketPrivateMessageReadPayload = {

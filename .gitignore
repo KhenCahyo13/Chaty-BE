@@ -5,3 +5,4 @@
 /logs
 *.log
 /src/generated/prisma
+/.pnpm-store

@@ -1,4 +1,8 @@
 import { io } from '@lib/socket';
+import {
+    invalidatePrivateConversationCacheByConversationId,
+    invalidatePrivateConversationCacheByUserIds,
+} from '@modules/private-conversation/private-conversation.cache';
 import { findPrivateConversationUserIdsById } from '@modules/private-conversation/private-conversation.repository';
 
 import { PrivateMessage } from './private-message.model';
@@ -27,6 +31,17 @@ export const createPrivateMessage = async (
         conversationUsersIds?.user1Id === senderId
             ? conversationUsersIds.user2Id
             : conversationUsersIds?.user1Id;
+
+    await Promise.all([
+        invalidatePrivateConversationCacheByConversationId(
+            createdMessage.privateConversationId
+        ),
+        invalidatePrivateConversationCacheByUserIds(
+            [senderId, receiverId].filter(
+                (userId): userId is string => typeof userId === 'string'
+            )
+        ),
+    ]);
 
     const socketPayload: SocketPrivateMessageCreatedPayload = {
         private_conversation_id: createdMessage.privateConversationId,

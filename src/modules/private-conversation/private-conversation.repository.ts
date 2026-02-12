@@ -1,5 +1,11 @@
 import prisma from '@lib/prisma';
+import { getCache, setCache } from '@lib/redis';
 
+import {
+    buildPrivateConversationDetailsCacheKey,
+    buildPrivateConversationListCacheKey,
+    buildPrivateConversationMessagesCacheKey,
+} from './private-conversation.cache';
 import { PrivateConversation } from './private-conversation.model';
 import {
     conversationUserIdsSelect,
@@ -21,6 +27,21 @@ export const findAllPrivateConversationsByUserId = async (
     conversations: PrivateConversationListItem[];
     nextCursor: string | null;
 }> => {
+    const cacheKey = buildPrivateConversationListCacheKey(
+        userId,
+        limit,
+        search,
+        cursor
+    );
+    const cached = await getCache<{
+        conversations: PrivateConversationListItem[];
+        nextCursor: string | null;
+    }>(cacheKey);
+
+    if (cached) {
+        return cached;
+    }
+
     const conversations = await prisma.privateConversation.findMany({
         take: limit,
         orderBy: {
@@ -146,18 +167,34 @@ export const findAllPrivateConversationsByUserId = async (
         };
     });
 
-    return {
+    const result = {
         conversations: mappedConversations,
         nextCursor: mappedConversations.length
             ? mappedConversations[mappedConversations.length - 1].id
             : null,
     };
+
+    await setCache(cacheKey, result);
+
+    return result;
 };
 
 export const findPrivateConversationDetailsById = async (
     id: string,
     userId: string
 ) => {
+    const cacheKey = buildPrivateConversationDetailsCacheKey(id, userId);
+    const cached = await getCache<{
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        receiver: Record<string, unknown>;
+    }>(cacheKey);
+
+    if (cached) {
+        return cached;
+    }
+
     const conversation = await prisma.privateConversation.findFirst({
         where: {
             id: id,
@@ -173,15 +210,23 @@ export const findPrivateConversationDetailsById = async (
         },
     });
 
-    return {
-        id: conversation?.id,
-        createdAt: conversation?.createdAt,
-        updatedAt: conversation?.updatedAt,
+    if (!conversation) {
+        return null;
+    }
+
+    const result = {
+        id: conversation.id,
+        createdAt: conversation.createdAt,
+        updatedAt: conversation.updatedAt,
         receiver:
-            conversation?.user1Id === userId
-                ? conversation?.user2
-                : conversation?.user1,
+            conversation.user1Id === userId
+                ? conversation.user2
+                : conversation.user1,
     };
+
+    await setCache(cacheKey, result);
+
+    return result;
 };
 
 export const findPrivateConversationMessagesById = async (
@@ -190,6 +235,28 @@ export const findPrivateConversationMessagesById = async (
     limit: number,
     cursor?: string
 ) => {
+    const cacheKey = buildPrivateConversationMessagesCacheKey(
+        id,
+        userId,
+        limit,
+        cursor
+    );
+    const cached = await getCache<{
+        messages: Array<{
+            id: string;
+            content: string | null;
+            isMe: boolean;
+            isDeleted: boolean;
+            isRead: boolean;
+            createdAt: Date;
+        }>;
+        nextCursor: string | null;
+    }>(cacheKey);
+
+    if (cached) {
+        return cached;
+    }
+
     const conversation = await prisma.privateConversation.findFirst({
         where: {
             id: id,
@@ -213,7 +280,11 @@ export const findPrivateConversationMessagesById = async (
         },
     });
 
-    const messages = conversation?.messages.map((message) => {
+    if (!conversation) {
+        return null;
+    }
+
+    const messages = conversation.messages.map((message) => {
         const { _count, ...msg } = message;
 
         return {
@@ -226,10 +297,14 @@ export const findPrivateConversationMessagesById = async (
         };
     });
 
-    return {
+    const result = {
         messages,
-        nextCursor: messages?.length ? messages[messages.length - 1].id : null,
+        nextCursor: messages.length ? messages[messages.length - 1].id : null,
     };
+
+    await setCache(cacheKey, result);
+
+    return result;
 };
 
 export const findPrivateConversationUserIdsById = async (
