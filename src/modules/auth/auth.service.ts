@@ -32,7 +32,11 @@ export const login = async (
 
     storeRefreshToken(refreshToken, user.id);
 
-    const { password: _password, ...safeUser } = user;
+    const safeUser = {
+        id: user.id,
+        username: user.username,
+        email: user.email,
+    };
 
     return {
         user: safeUser,

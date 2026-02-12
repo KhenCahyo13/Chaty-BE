@@ -39,6 +39,4 @@ const server = http.createServer(app);
 
 initSocket(server);
 
-server.listen(port, () => {
-    console.log(`HTTP + Socket server running on http://localhost:${port}`);
-});
+server.listen(port);
