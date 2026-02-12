@@ -1,6 +1,6 @@
 do $$
 begin
-    create type "MessageType" as enum ('TEXT', 'AUDIO', 'IMAGE');
+    create type "MessageType" as enum ('TEXT', 'AUDIO', 'FILE');
 exception
     when duplicate_object then null;
 end

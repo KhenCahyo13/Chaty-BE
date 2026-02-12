@@ -8,6 +8,7 @@ import { PrivateMessage } from './private-message.model';
 import {
     CreatePrivateMessageValues,
     SocketPrivateMessagePayload,
+    StorePrivateMessageAttachmentInput,
 } from './private-message.types';
 
 const AUDIO_SIGNED_URL_EXPIRES_IN = Number(
@@ -17,33 +18,34 @@ const AUDIO_SIGNED_URL_EXPIRES_IN = Number(
 export const storePrivateMessage = async (
     data: CreatePrivateMessageValues,
     senderId: string,
-    audioFile?: Express.Multer.File,
-    audioPath?: string
+    attachments: StorePrivateMessageAttachmentInput[]
 ): Promise<PrivateMessage> => {
-    const audioExtension = audioFile
-        ? extname(audioFile.originalname).replace('.', '').toLowerCase()
-        : null;
-
     return await prisma.privateMessage.create({
         data: {
             content: data.content,
             messageType: data.message_type,
             privateConversationId: data.private_conversation_id,
             senderId: senderId,
-            ...(audioFile &&
-                audioPath && {
-                    attachments: {
-                        create: [
-                            {
-                                fileName: audioFile.originalname,
-                                fileSize: BigInt(audioFile.size),
-                                fileType:
-                                    audioExtension?.slice(0, 10) ?? 'audio',
-                                fileUrl: audioPath,
-                            },
-                        ],
-                    },
-                }),
+            ...(attachments.length && {
+                attachments: {
+                    create: attachments.map((attachment) => {
+                        const extension = extname(attachment.fileName)
+                            .replace('.', '')
+                            .toLowerCase();
+                        const normalizedFileType =
+                            extension ||
+                            attachment.fileType.split('/')[1] ||
+                            'file';
+
+                        return {
+                            fileName: attachment.fileName,
+                            fileSize: BigInt(attachment.fileSize),
+                            fileType: normalizedFileType.slice(0, 10),
+                            fileUrl: attachment.filePath,
+                        };
+                    }),
+                },
+            }),
         },
     });
 };
@@ -52,6 +54,7 @@ export const formatPrivateMessageForSocket = async (
     messageId: string
 ): Promise<SocketPrivateMessagePayload> => {
     const audioBucket = process.env.SUPABASE_STORAGE_AUDIO_BUCKET;
+    const filesBucket = process.env.SUPABASE_STORAGE_FILES_BUCKET;
     const message = await prisma.privateMessage.findUnique({
         include: {
             _count: {
@@ -62,9 +65,9 @@ export const formatPrivateMessageForSocket = async (
                     id: 'asc',
                 },
                 select: {
+                    fileName: true,
                     fileUrl: true,
                 },
-                take: 1,
             },
         },
         where: { id: messageId },
@@ -78,6 +81,10 @@ export const formatPrivateMessageForSocket = async (
         message.messageType === 'AUDIO'
             ? message.attachments[0]?.fileUrl
             : null;
+    const filePaths =
+        message.messageType === 'FILE'
+            ? message.attachments.map((attachment) => attachment.fileUrl)
+            : [];
     const audioUrl =
         !message.isDeleted && audioPath && audioBucket
             ? (
@@ -88,11 +95,26 @@ export const formatPrivateMessageForSocket = async (
                   })
               ).signedUrl
             : null;
+    const fileUrls =
+        !message.isDeleted && filesBucket && filePaths.length
+            ? await Promise.all(
+                  filePaths.map(async (filePath) => {
+                      return (
+                          await createSignedUrl({
+                              bucket: filesBucket,
+                              expiresIn: AUDIO_SIGNED_URL_EXPIRES_IN,
+                              path: filePath,
+                          })
+                      ).signedUrl;
+                  })
+              )
+            : [];
 
     return {
         audioUrl,
         content: message.isDeleted ? null : message.content,
         createdAt: message.createdAt,
+        fileUrls,
         id: message.id,
         isDeleted: message.isDeleted,
         messageType: message.messageType,

@@ -241,6 +241,7 @@ export const findPrivateConversationMessagesById = async (
     cursor?: string
 ) => {
     const audioBucket = process.env.SUPABASE_STORAGE_AUDIO_BUCKET;
+    const filesBucket = process.env.SUPABASE_STORAGE_FILES_BUCKET;
     const cacheKey = buildPrivateConversationMessagesCacheKey(
         id,
         userId,
@@ -252,11 +253,12 @@ export const findPrivateConversationMessagesById = async (
             audioUrl: null | string;
             content: null | string;
             createdAt: Date;
+            fileUrls: string[];
             id: string;
             isDeleted: boolean;
             isMe: boolean;
             isRead: boolean;
-            messageType: 'AUDIO' | 'TEXT';
+            messageType: 'AUDIO' | 'FILE' | 'TEXT';
         }>;
         nextCursor: null | string;
     }>(cacheKey);
@@ -286,7 +288,6 @@ export const findPrivateConversationMessagesById = async (
                         select: {
                             fileUrl: true,
                         },
-                        take: 1,
                     },
                 },
             },
@@ -306,6 +307,10 @@ export const findPrivateConversationMessagesById = async (
             const { _count, attachments, ...msg } = message;
             const audioPath =
                 msg.messageType === 'AUDIO' ? attachments[0]?.fileUrl : null;
+            const filePaths =
+                msg.messageType === 'FILE'
+                    ? attachments.map((attachment) => attachment.fileUrl)
+                    : [];
             const audioUrl =
                 !msg.isDeleted && audioPath && audioBucket
                     ? (
@@ -316,11 +321,26 @@ export const findPrivateConversationMessagesById = async (
                           })
                       ).signedUrl
                     : null;
+            const fileUrls =
+                !msg.isDeleted && filesBucket && filePaths.length
+                    ? await Promise.all(
+                          filePaths.map(async (filePath) => {
+                              return (
+                                  await createSignedUrl({
+                                      bucket: filesBucket,
+                                      expiresIn: AUDIO_SIGNED_URL_EXPIRES_IN,
+                                      path: filePath,
+                                  })
+                              ).signedUrl;
+                          })
+                      )
+                    : [];
 
             return {
                 audioUrl,
                 content: msg.isDeleted ? null : msg.content,
                 createdAt: msg.createdAt,
+                fileUrls,
                 id: msg.id,
                 isDeleted: msg.isDeleted,
                 isMe: msg.senderId === userId,

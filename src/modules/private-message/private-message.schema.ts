@@ -8,7 +8,7 @@ export const createPrivateMessageSchema = z.object({
         .transform((value) =>
             value === undefined || value === '' ? null : value
         ),
-    message_type: z.enum(['AUDIO', 'TEXT']).default('TEXT'),
+    message_type: z.enum(['AUDIO', 'FILE', 'TEXT']).default('TEXT'),
     private_conversation_id: z.uuid(
         'Invalid conversation id format. Must be a valid UUID.'
     ),

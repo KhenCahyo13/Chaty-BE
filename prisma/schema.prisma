@@ -16,6 +16,7 @@ datasource db {
 enum MessageType {
   TEXT
   AUDIO
+  FILE
 }
 
 model User {

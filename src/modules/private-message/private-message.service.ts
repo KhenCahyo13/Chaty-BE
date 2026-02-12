@@ -24,20 +24,47 @@ import {
 export const createPrivateMessage = async (
     data: CreatePrivateMessageValues,
     senderId: string,
-    audioFile?: Express.Multer.File
+    uploadedMedia?: {
+        audioFile?: Express.Multer.File;
+        files: Express.Multer.File[];
+    }
 ): Promise<PrivateMessage> => {
     const audioBucket = process.env.SUPABASE_STORAGE_AUDIO_BUCKET;
-    const messageType = audioFile ? 'AUDIO' : data.message_type;
+    const filesBucket = process.env.SUPABASE_STORAGE_FILES_BUCKET;
+    const audioFile = uploadedMedia?.audioFile;
+    const files = uploadedMedia?.files ?? [];
+    const hasAudio = Boolean(audioFile);
+    const hasFiles = files.length > 0;
+    const messageType = hasAudio
+        ? 'AUDIO'
+        : hasFiles
+          ? 'FILE'
+          : data.message_type;
 
-    if (!audioFile && messageType === 'AUDIO') {
+    if (hasAudio && hasFiles) {
+        throw createHttpError(
+            'Cannot send audio and file attachments in one message.',
+            400
+        );
+    }
+
+    if (!hasAudio && messageType === 'AUDIO') {
         throw createHttpError('Audio file is required for audio message.', 400);
     }
 
-    if (!audioFile && messageType === 'TEXT' && !data.content) {
+    if (!hasFiles && messageType === 'FILE') {
+        throw createHttpError(
+            'At least one file is required for file message.',
+            400
+        );
+    }
+
+    if (!hasAudio && !hasFiles && messageType === 'TEXT' && !data.content) {
         throw createHttpError('Message content cannot be empty.', 400);
     }
 
     let audioPath: string | undefined;
+    let filePaths: string[] = [];
 
     if (audioFile) {
         if (!audioBucket) {
@@ -57,15 +84,61 @@ export const createPrivateMessage = async (
         });
     }
 
+    if (hasFiles) {
+        if (!filesBucket) {
+            throw createHttpError(
+                'SUPABASE_STORAGE_FILES_BUCKET is not configured.',
+                500
+            );
+        }
+
+        filePaths = await Promise.all(
+            files.map(async (file) => {
+                const filePath = buildStorageObjectPath(
+                    senderId,
+                    file.originalname
+                );
+                await uploadFileWithBuffer({
+                    bucket: filesBucket,
+                    buffer: file.buffer,
+                    contentType: file.mimetype,
+                    path: filePath,
+                    upsert: false,
+                });
+
+                return filePath;
+            })
+        );
+    }
+
     const createdMessage = await storePrivateMessage(
         {
             ...data,
-            content: messageType === 'TEXT' ? data.content : null,
+            content:
+                messageType === 'TEXT' && !hasAudio && !hasFiles
+                    ? data.content
+                    : null,
             message_type: messageType,
         },
         senderId,
-        audioFile,
-        audioPath
+        [
+            ...(hasAudio && audioFile && audioPath
+                ? [
+                      {
+                          fileName: audioFile.originalname,
+                          filePath: audioPath,
+                          fileSize: audioFile.size,
+                          fileType: audioFile.mimetype,
+                      },
+                  ]
+                : []),
+            ...files.map((file, index) => ({
+                fileName: file.originalname,
+                filePath: filePaths[index],
+                fileSize: file.size,
+                fileType: file.mimetype,
+            })),
+        ]
     );
     const conversationUsersIds = await findPrivateConversationUserIdsById(
         createdMessage.privateConversationId
@@ -110,7 +183,10 @@ export const createPrivateMessage = async (
                     body:
                         formattedMessage.messageType === 'AUDIO'
                             ? 'Voice message'
-                            : (formattedMessage.content ?? '(Deleted message)'),
+                            : formattedMessage.messageType === 'FILE'
+                              ? 'File message'
+                              : (formattedMessage.content ??
+                                '(Deleted message)'),
                     data: {
                         private_conversation_id:
                             createdMessage.privateConversationId,
