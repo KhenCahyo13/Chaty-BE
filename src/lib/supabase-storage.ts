@@ -64,7 +64,7 @@ const getSupabaseClient = (): SupabaseClient => {
 
     if (!supabaseUrl || !supabaseKey) {
         throw createHttpError(
-            'Konfigurasi Supabase Storage belum lengkap. Isi SUPABASE_URL dan SUPABASE_SERVICE_ROLE_KEY (atau SUPABASE_ANON_KEY).',
+            'Supabase Storage configuration is incomplete. Please set SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY (or SUPABASE_ANON_KEY).',
             500
         );
     }
@@ -92,7 +92,7 @@ export const uploadFile = async ({
 
     if (error) {
         throw createHttpError(
-            'Gagal upload file ke Supabase Storage.',
+            'Failed to upload file to Supabase Storage.',
             500,
             error
         );
@@ -129,7 +129,7 @@ export const deleteFile = async ({ bucket, path }: DeleteFileParams) => {
 
     if (error) {
         throw createHttpError(
-            'Gagal menghapus file di Supabase Storage.',
+            'Failed to delete file from Supabase Storage.',
             500,
             error
         );
@@ -151,7 +151,7 @@ export const createSignedUrl = async ({
 
     if (error) {
         throw createHttpError(
-            'Gagal membuat signed URL dari Supabase Storage.',
+            'Failed to create a signed URL from Supabase Storage.',
             500,
             error
         );

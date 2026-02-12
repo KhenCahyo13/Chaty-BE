@@ -19,7 +19,7 @@ export const buildSupabaseStoragePublicUrl = (
 
     if (!supabaseUrl) {
         throw createHttpError(
-            'Konfigurasi Supabase belum lengkap. Isi SUPABASE_URL.',
+            'Supabase configuration is incomplete. Please set SUPABASE_URL.',
             500
         );
     }

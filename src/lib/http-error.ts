@@ -27,7 +27,7 @@ export const toHttpError = (error: unknown): HttpError => {
 
     return {
         statusCode: 500,
-        message: 'Terjadi kesalahan pada server.',
+        message: 'An internal server error occurred.',
         errors: null,
     };
 };

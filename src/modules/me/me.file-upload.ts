@@ -44,7 +44,7 @@ export const uploadAvatarMiddleware = (
             error.code === 'LIMIT_FILE_SIZE'
         ) {
             const { statusCode, message, errors } = toHttpError(
-                createHttpError('Ukuran avatar maksimal 2MB.', 400)
+                createHttpError('Maximum avatar size is 2MB.', 400)
             );
             res.status(statusCode).json(errorResponse(message, errors));
             return;
