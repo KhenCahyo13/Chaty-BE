@@ -50,3 +50,12 @@ export const findUserByUsername = async (
         },
     });
 };
+
+export const findUserById = async (
+    id: string
+): Promise<UserListResponse | null> => {
+    return prisma.user.findUnique({
+        where: { id },
+        select: listUsersSelect,
+    });
+};
