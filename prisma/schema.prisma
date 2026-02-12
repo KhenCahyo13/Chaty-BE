@@ -37,7 +37,7 @@ model User {
 model UserPushToken {
   id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   userId    String   @map("user_id") @db.Uuid
-  fcmToken  String   @unique @map("fcm_token") @db.Text
+  fcmToken  String   @map("fcm_token") @db.Text
   platform  String   @db.VarChar(20)
   deviceId  String?  @map("device_id") @db.VarChar(255)
   isActive  Boolean  @default(true) @map("is_active")
@@ -47,7 +47,9 @@ model UserPushToken {
 
   user User @relation(fields: [userId], references: [id], onUpdate: Cascade, onDelete: Cascade)
 
+  @@unique([userId, platform])
   @@index([userId, isActive])
+  @@index([fcmToken])
   @@index([deviceId])
   @@map("user_push_tokens")
 }

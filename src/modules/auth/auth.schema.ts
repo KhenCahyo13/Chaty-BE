@@ -8,3 +8,9 @@ export const loginSchema = z.object({
 export const refreshSchema = z.object({
     refresh_token: z.string().min(1, 'Refresh token is required.'),
 });
+
+export const registerPushTokenSchema = z.object({
+    fcm_token: z.string().min(1, 'FCM token is required.'),
+    platform: z.enum(['ios', 'android', 'web']),
+    device_id: z.string().max(255).optional(),
+});

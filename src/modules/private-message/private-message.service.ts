@@ -1,9 +1,12 @@
+import { sendFcmNotificationToTokens } from '@config/firebase';
 import { io } from '@lib/socket';
 import {
     invalidatePrivateConversationCacheByConversationId,
     invalidatePrivateConversationCacheByUserIds,
 } from '@modules/private-conversation/private-conversation.cache';
 import { findPrivateConversationUserIdsById } from '@modules/private-conversation/private-conversation.repository';
+import { findUserById } from '@modules/user/user.repository';
+import { findActivePushTokensByUserId } from '@modules/user-push-token/user-push-token.repository';
 
 import { PrivateMessage } from './private-message.model';
 import {
@@ -50,6 +53,30 @@ export const createPrivateMessage = async (
 
     io.to(`user:${senderId}`).emit('private-message:sent', socketPayload);
     io.to(`user:${receiverId}`).emit('private-message:new', socketPayload);
+
+    if (receiverId) {
+        const receiverTokens = await findActivePushTokensByUserId(receiverId);
+        const sender = await findUserById(senderId);
+        const senderName =
+            sender?.profile?.fullName || sender?.username || 'Unknown';
+
+        if (receiverTokens.length) {
+            try {
+                await sendFcmNotificationToTokens(receiverTokens, {
+                    title: `New message from ${senderName}`,
+                    body: formattedMessage.content ?? '(Deleted message)',
+                    data: {
+                        private_conversation_id:
+                            createdMessage.privateConversationId,
+                        private_message_id: createdMessage.id,
+                        sender_id: senderId,
+                    },
+                });
+            } catch {
+                // Ignore FCM errors
+            }
+        }
+    }
 
     return createdMessage;
 };

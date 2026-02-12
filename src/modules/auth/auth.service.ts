@@ -1,4 +1,6 @@
 import { findUserByUsername } from '@modules/user/user.repository';
+import { upsertUserPushToken } from '@modules/user-push-token/user-push-token.repository';
+import { RegisterPushTokenResult } from '@modules/user-push-token/user-push-token.types';
 import bcrypt from 'bcryptjs';
 
 import {
@@ -10,7 +12,11 @@ import {
     rotateRefreshToken,
     storeRefreshToken,
 } from './auth.helpers';
-import type { LoginResult, RefreshResult } from './auth.types';
+import type {
+    LoginResult,
+    RefreshResult,
+    RegisterPushTokenInput,
+} from './auth.types';
 
 export const login = async (
     username: string,
@@ -54,4 +60,11 @@ export const refresh = async (refreshToken: string): Promise<RefreshResult> => {
 
 export const logout = async (userId: string): Promise<void> => {
     revokeUserRefreshTokens(userId);
+};
+
+export const registerPushToken = async (
+    userId: string,
+    payload: RegisterPushTokenInput
+): Promise<RegisterPushTokenResult> => {
+    return upsertUserPushToken(userId, payload);
 };

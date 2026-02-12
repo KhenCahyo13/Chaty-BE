@@ -4,8 +4,12 @@ import { mapZodIssues } from '@lib/validation-error';
 import { authenticateUser, AuthRequest } from '@modules/auth/auth.middleware';
 import { Router } from 'express';
 
-import { loginSchema, refreshSchema } from './auth.schema';
-import { login, logout, refresh } from './auth.service';
+import {
+    loginSchema,
+    refreshSchema,
+    registerPushTokenSchema,
+} from './auth.schema';
+import { login, logout, refresh, registerPushToken } from './auth.service';
 
 const router = Router();
 
@@ -68,6 +72,31 @@ router.post('/logout', authenticateUser, async (req, res) => {
         const { userId } = (req as AuthRequest).auth;
         await logout(userId);
         return res.json(successResponse('Logout successful.', null));
+    } catch (error) {
+        const { statusCode, message, errors } = toHttpError(error);
+        return res.status(statusCode).json(errorResponse(message, errors));
+    }
+});
+
+router.post('/push-token', authenticateUser, async (req, res) => {
+    const parsed = registerPushTokenSchema.safeParse(req.body ?? {});
+    if (!parsed.success) {
+        return res
+            .status(400)
+            .json(
+                errorResponse(
+                    'Payload is not valid.',
+                    mapZodIssues(parsed.error.issues)
+                )
+            );
+    }
+
+    try {
+        const { userId } = (req as AuthRequest).auth;
+        const result = await registerPushToken(userId, parsed.data);
+        return res.json(
+            successResponse('Push token registered successfully.', result)
+        );
     } catch (error) {
         const { statusCode, message, errors } = toHttpError(error);
         return res.status(statusCode).json(errorResponse(message, errors));

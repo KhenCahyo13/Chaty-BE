@@ -1,3 +1,5 @@
+import { HttpError } from '@lib/http-error';
+
 export type AuthUser = {
     id: string;
     username: string;
@@ -17,6 +19,21 @@ export type RefreshResult = AuthTokens & {
     userId: string;
 };
 
-import type { HttpError } from '../../lib/http-error';
+export type RegisterPushTokenInput = {
+    fcm_token: string;
+    platform: 'ios' | 'android' | 'web';
+    device_id?: string;
+};
 
 export type AuthError = HttpError;
+
+export type FcmNotificationPayload = {
+    title: string;
+    body: string;
+    data?: Record<string, string>;
+};
+
+export type GoogleOAuthTokenResponse = {
+    access_token: string;
+    expires_in: number;
+};
