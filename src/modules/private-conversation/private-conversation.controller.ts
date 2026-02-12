@@ -20,10 +20,12 @@ const router = Router();
 router.get('', authenticateUser, async (req, res) => {
     try {
         const { userId } = (req as AuthRequest).auth;
-        const limit = req.query.limit
-            ? parseInt(req.query.limit as string, 10)
-            : 20;
-        const result = await findAllPrivateConversationsByUserId(limit, userId);
+        const { limit, search } = req.query;
+        const result = await findAllPrivateConversationsByUserId(
+            limit ? parseInt(limit as string, 10) : 10,
+            search as string | undefined,
+            userId
+        );
 
         return res.json(
             successResponse(

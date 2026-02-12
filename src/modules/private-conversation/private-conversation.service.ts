@@ -15,9 +15,10 @@ import {
 
 export const getAllPrivateConversationsByUserId = async (
     limit: number,
+    search: string | undefined,
     userId: string
 ): Promise<PrivateConversationListItem[]> => {
-    return await findAllPrivateConversationsByUserId(limit, userId);
+    return await findAllPrivateConversationsByUserId(limit, search, userId);
 };
 
 export const getPrivateConversationDetailsById = async (

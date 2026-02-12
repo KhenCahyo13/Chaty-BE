@@ -14,12 +14,55 @@ import {
 
 export const findAllPrivateConversationsByUserId = async (
     limit: number,
+    search: string | undefined,
     userId: string
 ): Promise<PrivateConversationListItem[]> => {
     const conversations = await prisma.privateConversation.findMany({
         take: limit,
         where: {
             OR: [{ user1Id: userId }, { user2Id: userId }],
+            AND: [
+                {
+                    OR: [
+                        {
+                            user1: {
+                                username: {
+                                    contains: search,
+                                    mode: 'insensitive',
+                                },
+                            },
+                        },
+                        {
+                            user2: {
+                                username: {
+                                    contains: search,
+                                    mode: 'insensitive',
+                                },
+                            },
+                        },
+                        {
+                            user1: {
+                                profile: {
+                                    fullName: {
+                                        contains: search,
+                                        mode: 'insensitive',
+                                    },
+                                },
+                            },
+                        },
+                        {
+                            user2: {
+                                profile: {
+                                    fullName: {
+                                        contains: search,
+                                        mode: 'insensitive',
+                                    },
+                                },
+                            },
+                        },
+                    ],
+                },
+            ],
             messages: {
                 some: {},
             },
