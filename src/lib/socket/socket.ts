@@ -7,6 +7,7 @@ import {
     emitOfflinePresenceToPrivateConversations,
     registerPrivateConversationHandlers,
 } from './socket-private-conversation';
+import { registerPrivateCallHandlers } from './socket-private-call';
 
 export let io: Server;
 
@@ -30,6 +31,7 @@ export const initSocket = (server: http.Server) => {
         socket.join(`user:${userId}`);
         const joinedPrivateConversationIds =
             registerPrivateConversationHandlers(io, socket, userId);
+        registerPrivateCallHandlers(io, socket, userId);
 
         if (markUserConnected(userId)) {
             try {
