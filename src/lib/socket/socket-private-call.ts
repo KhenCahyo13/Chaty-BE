@@ -2,7 +2,8 @@ import { findPrivateConversationUserIdsById } from '@modules/private-conversatio
 import { randomUUID } from 'crypto';
 import { Server, Socket } from 'socket.io';
 
-const buildPrivateCallRoom = (conversationId: string): string => `private-call:${conversationId}`;
+const buildPrivateCallRoom = (conversationId: string): string =>
+    `private-call:${conversationId}`;
 const privateCallEndStatuses = new Set([
     'ended',
     'missed',
@@ -16,7 +17,12 @@ const getPrivateCallId = (payload: unknown): null | string => {
         return payload;
     }
 
-    if (typeof payload === 'object' && payload && 'private_conversation_id' in payload && typeof payload.private_conversation_id === 'string') {
+    if (
+        typeof payload === 'object' &&
+        payload &&
+        'private_conversation_id' in payload &&
+        typeof payload.private_conversation_id === 'string'
+    ) {
         return payload.private_conversation_id;
     }
 
@@ -38,7 +44,7 @@ const getCallType = (payload: unknown): 'audio' | 'video' => {
 
 const getCallEndStatus = (
     payload: unknown
-): 'ended' | 'missed' | 'rejected' | 'failed' | 'cancelled' => {
+): 'cancelled' | 'ended' | 'failed' | 'missed' | 'rejected' => {
     if (
         typeof payload === 'object' &&
         payload &&
@@ -47,11 +53,11 @@ const getCallEndStatus = (
         privateCallEndStatuses.has(payload.status as never)
     ) {
         return payload.status as
+            | 'cancelled'
             | 'ended'
-            | 'missed'
-            | 'rejected'
             | 'failed'
-            | 'cancelled';
+            | 'missed'
+            | 'rejected';
     }
 
     return 'ended';
@@ -122,7 +128,10 @@ export const registerPrivateCallHandlers = (
         };
 
         io.to(`user:${userId}`).emit('private-call:started', socketPayload);
-        io.to(`user:${receiverId}`).emit('private-call:incoming', socketPayload);
+        io.to(`user:${receiverId}`).emit(
+            'private-call:incoming',
+            socketPayload
+        );
     });
 
     socket.on('private-call:answer', async (payload: unknown) => {
@@ -169,7 +178,10 @@ export const registerPrivateCallHandlers = (
         };
 
         io.to(`user:${userId}`).emit('private-call:answered', socketPayload);
-        io.to(`user:${receiverId}`).emit('private-call:answered', socketPayload);
+        io.to(`user:${receiverId}`).emit(
+            'private-call:answered',
+            socketPayload
+        );
 
         io.to(`user:${userId}`).emit('private-call:ongoing', socketPayload);
         io.to(`user:${receiverId}`).emit('private-call:ongoing', socketPayload);

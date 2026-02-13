@@ -3,11 +3,11 @@ import http from 'http';
 import { Server } from 'socket.io';
 
 import { markUserConnected, markUserDisconnected } from './socket-presence';
+import { registerPrivateCallHandlers } from './socket-private-call';
 import {
     emitOfflinePresenceToPrivateConversations,
     registerPrivateConversationHandlers,
 } from './socket-private-conversation';
-import { registerPrivateCallHandlers } from './socket-private-call';
 
 export let io: Server;
 
