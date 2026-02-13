@@ -13,3 +13,9 @@ export const listUsersSelect = {
     },
     username: true,
 };
+
+export const presenceUserSelect = {
+    ...listUsersSelect,
+    isOnline: true,
+    lastSeenAt: true,
+};

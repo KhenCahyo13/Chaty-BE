@@ -24,6 +24,8 @@ model User {
   username  String   @unique @db.VarChar(100)
   email     String   @unique @db.VarChar(255)
   password  String   @db.VarChar(255)
+  isOnline  Boolean  @default(false) @map("is_online")
+  lastSeenAt DateTime @default(now()) @map("last_seen_at") @db.Timestamptz(6)
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt DateTime @default(now()) @map("updated_at") @db.Timestamptz(6)
 

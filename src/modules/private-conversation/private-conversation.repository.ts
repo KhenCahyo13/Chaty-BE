@@ -360,7 +360,7 @@ export const findPrivateConversationMessagesById = async (
 
 export const findPrivateConversationUserIdsById = async (
     id: string
-): Promise<null | Partial<PrivateConversation>> => {
+): Promise<null | { id: string; user1Id: string; user2Id: string }> => {
     const conversation = await prisma.privateConversation.findUnique({
         select: conversationUserIdsSelect,
         where: {

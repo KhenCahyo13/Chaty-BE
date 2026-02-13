@@ -8,6 +8,8 @@ export type UserAuthRecord = {
 export interface UserListResponse {
     email: string;
     id: string;
+    isOnline: boolean;
+    lastSeenAt: Date;
     profile: null | {
         about: null | string;
         avatarUrl: null | string;

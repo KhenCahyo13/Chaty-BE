@@ -1,8 +1,12 @@
 import prisma from '@lib/prisma';
 import { getCache, setCache } from '@lib/redis';
 
-import { buildUserByIdCacheKey, buildUserListCacheKey } from './user.cache';
-import { listUsersSelect } from './user.select';
+import {
+    buildUserByIdCacheKey,
+    buildUserListCacheKey,
+    invalidateUserCacheById,
+} from './user.cache';
+import { listUsersSelect, presenceUserSelect } from './user.select';
 import type { UserAuthRecord, UserListResponse } from './user.types';
 
 export const findAllUsers = async (
@@ -50,7 +54,7 @@ export const findAllUsers = async (
 
     await setCache(cacheKey, result);
 
-    return result;
+    return result as { nextCursor: null | string; users: UserListResponse[] };
 };
 
 export const findUserByUsername = async (
@@ -78,7 +82,7 @@ export const findUserById = async (
     }
 
     const result = await prisma.user.findUnique({
-        select: listUsersSelect,
+        select: presenceUserSelect,
         where: { id },
     });
 
@@ -87,4 +91,37 @@ export const findUserById = async (
     }
 
     return result;
+};
+
+export const findUserPresenceById = async (
+    id: string
+): Promise<null | { id: string; isOnline: boolean; lastSeenAt: Date }> => {
+    return prisma.user.findUnique({
+        select: {
+            id: true,
+            isOnline: true,
+            lastSeenAt: true,
+        },
+        where: { id },
+    });
+};
+
+export const setUserOnlineStatus = async (
+    userId: string,
+    isOnline: boolean
+): Promise<void> => {
+    const now = new Date();
+
+    await prisma.user.update({
+        data: {
+            isOnline,
+            ...(isOnline ? {} : { lastSeenAt: now }),
+            updatedAt: now,
+        },
+        where: {
+            id: userId,
+        },
+    });
+
+    await invalidateUserCacheById(userId);
 };

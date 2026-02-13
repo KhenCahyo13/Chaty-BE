@@ -9,6 +9,8 @@ export const profileListSelect = {
 export const userListSelect = {
     email: true,
     id: true,
+    isOnline: true,
+    lastSeenAt: true,
     profile: {
         select: profileListSelect,
     },
