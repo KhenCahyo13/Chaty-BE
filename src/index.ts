@@ -1,6 +1,6 @@
 import 'dotenv/config';
 
-import { initSocket } from '@lib/socket';
+import { initSocket } from '@lib/socket/socket';
 import cors from 'cors';
 import express from 'express';
 import http from 'http';

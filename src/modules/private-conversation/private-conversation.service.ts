@@ -1,5 +1,5 @@
 import { createHttpError } from '@lib/http-error';
-import { io } from '@lib/socket';
+import { io } from '@lib/socket/socket';
 import {
     findPrivateMessageInConversationById,
     findUnreadPrivateMessageIdsInConversation,

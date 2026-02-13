@@ -1,7 +1,7 @@
 import { sendFcmNotificationToTokens } from '@config/firebase';
 import { buildStorageObjectPath } from '@lib/file-upload';
 import { createHttpError } from '@lib/http-error';
-import { io } from '@lib/socket';
+import { io } from '@lib/socket/socket';
 import { uploadFileWithBuffer } from '@lib/supabase-storage';
 import {
     invalidatePrivateConversationCacheByConversationId,
