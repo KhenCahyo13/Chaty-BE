@@ -40,6 +40,17 @@ export const createPrivateMessage = async (
         : hasFiles
           ? 'FILE'
           : data.message_type;
+    const conversationUsersIds = await findPrivateConversationUserIdsById(
+        data.private_conversation_id
+    );
+
+    if (
+        !conversationUsersIds ||
+        (conversationUsersIds.user1Id !== senderId &&
+            conversationUsersIds.user2Id !== senderId)
+    ) {
+        throw createHttpError('Private conversation not found.', 404);
+    }
 
     if (hasAudio && hasFiles) {
         throw createHttpError(
@@ -139,9 +150,6 @@ export const createPrivateMessage = async (
                 fileType: file.mimetype,
             })),
         ]
-    );
-    const conversationUsersIds = await findPrivateConversationUserIdsById(
-        createdMessage.privateConversationId
     );
     const formattedMessage = await formatPrivateMessageForSocket(
         createdMessage.id
