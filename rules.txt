@@ -1,6 +1,0 @@
-- Ikuti code patterns yang sudah ada, seperti:
-    - Memisahkan service, repository, dan controller layer
-    - Business logic hanya di repository
-- Jika ada function yang dianggap reusable, maka create it as helper di lib folder. Jika function helper hanya digunakan di module itu, maka buat {module-name}.helpers.ts
-- Untuk logic file upload, bisa ditaruh di file module nya dengan nama {module-name}.file-upload.ts, contohnya bisa dilihat pada module me
-- Constanta harus di definisikan di folder constants
