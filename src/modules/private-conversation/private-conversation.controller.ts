@@ -1,10 +1,8 @@
 import { toHttpError } from '@lib/http-error';
 import { errorResponse, successResponse } from '@lib/response';
 import { mapZodIssues } from '@lib/validation-error';
-import {
-    authenticateUser,
-    type AuthRequest,
-} from '@modules/auth/auth.middleware';
+import { authenticateUser } from '@modules/auth/auth.middleware';
+import { AuthRequest } from '@modules/auth/auth.types';
 import { Router } from 'express';
 
 import { findAllPrivateConversationsByUserId } from './private-conversation.repository';

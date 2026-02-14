@@ -1,6 +1,6 @@
 import { jwtConfig } from '@config/jwt';
-import { HttpError } from '@lib/http-error';
 import jwt from 'jsonwebtoken';
+import { HttpError } from 'src/types/response';
 
 import type { AuthTokens } from './auth.types';
 

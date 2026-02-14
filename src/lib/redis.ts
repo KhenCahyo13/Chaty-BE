@@ -1,12 +1,11 @@
 import { redisConfig } from '@config/redis';
 import { createClient, type RedisClientType } from 'redis';
 
-const CACHE_NAMESPACE = 'dev-chaty';
-
 let redisClient: null | RedisClientType = null;
 let connectPromise: null | Promise<RedisClientType | undefined> = null;
 
-const buildNamespacedKey = (key: string): string => `${CACHE_NAMESPACE}:${key}`;
+const buildNamespacedKey = (key: string): string =>
+    `${redisConfig.namespace}:${key}`;
 
 const getRedisClient = (): null | RedisClientType => {
     if (!redisConfig.url) {

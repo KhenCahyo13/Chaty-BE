@@ -1,9 +1,11 @@
+import { formatAllowedOrigins } from '@lib/origin';
 import { setUserOnlineStatus } from '@modules/user/user.repository';
 import http from 'http';
 import { Server } from 'socket.io';
 
 import { markUserConnected, markUserDisconnected } from './socket-presence';
 import { registerPrivateCallHandlers } from './socket-private-call';
+import { registerPrivateCallWebRtcHandlers } from './socket-private-call-webrtc';
 import {
     emitOfflinePresenceToPrivateConversations,
     registerPrivateConversationHandlers,
@@ -15,7 +17,7 @@ export const initSocket = (server: http.Server) => {
     io = new Server(server, {
         cors: {
             credentials: true,
-            origin: ['http://localhost:5173'],
+            origin: formatAllowedOrigins(process.env.APP_ALLOWED_ORIGINS),
         },
     });
 
@@ -32,6 +34,7 @@ export const initSocket = (server: http.Server) => {
         const joinedPrivateConversationIds =
             registerPrivateConversationHandlers(io, socket, userId);
         registerPrivateCallHandlers(io, socket, userId);
+        registerPrivateCallWebRtcHandlers(io, socket, userId);
 
         if (markUserConnected(userId)) {
             try {

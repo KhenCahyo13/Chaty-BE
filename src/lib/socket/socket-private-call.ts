@@ -2,79 +2,13 @@ import { findPrivateConversationUserIdsById } from '@modules/private-conversatio
 import { randomUUID } from 'crypto';
 import { Server, Socket } from 'socket.io';
 
-const buildPrivateCallRoom = (conversationId: string): string =>
-    `private-call:${conversationId}`;
-const privateCallEndStatuses = new Set([
-    'ended',
-    'missed',
-    'rejected',
-    'failed',
-    'cancelled',
-] as const);
-
-const getPrivateCallId = (payload: unknown): null | string => {
-    if (typeof payload === 'string') {
-        return payload;
-    }
-
-    if (
-        typeof payload === 'object' &&
-        payload &&
-        'private_conversation_id' in payload &&
-        typeof payload.private_conversation_id === 'string'
-    ) {
-        return payload.private_conversation_id;
-    }
-
-    return null;
-};
-
-const getCallType = (payload: unknown): 'audio' | 'video' => {
-    if (
-        typeof payload === 'object' &&
-        payload &&
-        'call_type' in payload &&
-        (payload.call_type === 'audio' || payload.call_type === 'video')
-    ) {
-        return payload.call_type;
-    }
-
-    return 'audio';
-};
-
-const getCallEndStatus = (
-    payload: unknown
-): 'cancelled' | 'ended' | 'failed' | 'missed' | 'rejected' => {
-    if (
-        typeof payload === 'object' &&
-        payload &&
-        'status' in payload &&
-        typeof payload.status === 'string' &&
-        privateCallEndStatuses.has(payload.status as never)
-    ) {
-        return payload.status as
-            | 'cancelled'
-            | 'ended'
-            | 'failed'
-            | 'missed'
-            | 'rejected';
-    }
-
-    return 'ended';
-};
-
-const getCallId = (payload: unknown): null | string => {
-    if (
-        typeof payload === 'object' &&
-        payload &&
-        'call_id' in payload &&
-        typeof payload.call_id === 'string'
-    ) {
-        return payload.call_id;
-    }
-
-    return null;
-};
+import {
+    buildScopedRoom,
+    getCallEndStatus,
+    getCallId,
+    getCallType,
+    getPrivateConversationId,
+} from './socket.utils';
 
 export const registerPrivateCallHandlers = (
     io: Server,
@@ -82,7 +16,7 @@ export const registerPrivateCallHandlers = (
     userId: string
 ): void => {
     socket.on('private-call:start', async (payload: unknown) => {
-        const privateConversationId = getPrivateCallId(payload);
+        const privateConversationId = getPrivateConversationId(payload);
 
         if (!privateConversationId) {
             socket.emit('private-call:start:error', {
@@ -112,7 +46,7 @@ export const registerPrivateCallHandlers = (
         const callType = getCallType(payload);
         const startedAt = new Date();
         const callId = randomUUID();
-        const room = buildPrivateCallRoom(privateConversationId);
+        const room = buildScopedRoom('private-call', privateConversationId);
 
         socket.join(room);
 
@@ -135,7 +69,7 @@ export const registerPrivateCallHandlers = (
     });
 
     socket.on('private-call:answer', async (payload: unknown) => {
-        const privateConversationId = getPrivateCallId(payload);
+        const privateConversationId = getPrivateConversationId(payload);
 
         if (!privateConversationId) {
             socket.emit('private-call:answer:error', {
@@ -163,7 +97,7 @@ export const registerPrivateCallHandlers = (
                 ? conversation.user2Id
                 : conversation.user1Id;
         const callId = getCallId(payload);
-        const room = buildPrivateCallRoom(privateConversationId);
+        const room = buildScopedRoom('private-call', privateConversationId);
         const answeredAt = new Date();
 
         socket.join(room);
@@ -188,7 +122,7 @@ export const registerPrivateCallHandlers = (
     });
 
     socket.on('private-call:end', async (payload: unknown) => {
-        const privateConversationId = getPrivateCallId(payload);
+        const privateConversationId = getPrivateConversationId(payload);
 
         if (!privateConversationId) {
             socket.emit('private-call:end:error', {
@@ -216,7 +150,7 @@ export const registerPrivateCallHandlers = (
                 ? conversation.user2Id
                 : conversation.user1Id;
         const endedAt = new Date();
-        const room = buildPrivateCallRoom(privateConversationId);
+        const room = buildScopedRoom('private-call', privateConversationId);
         const status = getCallEndStatus(payload);
         const callId = getCallId(payload);
 

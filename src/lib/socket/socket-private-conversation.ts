@@ -2,25 +2,7 @@ import { findPrivateConversationUserIdsById } from '@modules/private-conversatio
 import { findUserPresenceById } from '@modules/user/user.repository';
 import { Server, Socket } from 'socket.io';
 
-const buildPrivateConversationRoom = (conversationId: string): string =>
-    `private-conversation:${conversationId}`;
-
-const getPrivateConversationId = (payload: unknown): null | string => {
-    if (typeof payload === 'string') {
-        return payload;
-    }
-
-    if (
-        typeof payload === 'object' &&
-        payload &&
-        'private_conversation_id' in payload &&
-        typeof payload.private_conversation_id === 'string'
-    ) {
-        return payload.private_conversation_id;
-    }
-
-    return null;
-};
+import { buildScopedRoom, getPrivateConversationId } from './socket.utils';
 
 export const registerPrivateConversationHandlers = (
     io: Server,
@@ -53,7 +35,10 @@ export const registerPrivateConversationHandlers = (
             return;
         }
 
-        const room = buildPrivateConversationRoom(privateConversationId);
+        const room = buildScopedRoom(
+            'private-conversation',
+            privateConversationId
+        );
         socket.join(room);
         joinedPrivateConversationIds.add(privateConversationId);
 
@@ -84,7 +69,9 @@ export const registerPrivateConversationHandlers = (
             return;
         }
 
-        socket.leave(buildPrivateConversationRoom(privateConversationId));
+        socket.leave(
+            buildScopedRoom('private-conversation', privateConversationId)
+        );
         joinedPrivateConversationIds.delete(privateConversationId);
     });
 
@@ -98,14 +85,13 @@ export const emitOfflinePresenceToPrivateConversations = (
     offlineAt: Date
 ): void => {
     for (const privateConversationId of privateConversationIds) {
-        io.to(buildPrivateConversationRoom(privateConversationId)).emit(
-            'private-conversation:presence',
-            {
-                is_online: false,
-                last_seen_at: offlineAt,
-                private_conversation_id: privateConversationId,
-                user_id: userId,
-            }
-        );
+        io.to(
+            buildScopedRoom('private-conversation', privateConversationId)
+        ).emit('private-conversation:presence', {
+            is_online: false,
+            last_seen_at: offlineAt,
+            private_conversation_id: privateConversationId,
+            user_id: userId,
+        });
     }
 };

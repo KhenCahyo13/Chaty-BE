@@ -3,13 +3,7 @@ import { errorResponse } from '@lib/response';
 import type { NextFunction, Request, Response } from 'express';
 
 import { verifyAccessToken } from './auth.helpers';
-
-export type AuthRequest = Request & {
-    auth: {
-        userId: string;
-        username?: string;
-    };
-};
+import { AuthRequest } from './auth.types';
 
 export const authenticateUser = (
     req: Request,

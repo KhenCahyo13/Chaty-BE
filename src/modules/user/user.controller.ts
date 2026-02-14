@@ -1,6 +1,7 @@
 import { toHttpError } from '@lib/http-error';
 import { errorResponse, successResponse } from '@lib/response';
-import { authenticateUser, AuthRequest } from '@modules/auth/auth.middleware';
+import { authenticateUser } from '@modules/auth/auth.middleware';
+import { AuthRequest } from '@modules/auth/auth.types';
 import { Router } from 'express';
 
 import { getAllUsers } from './user.service';

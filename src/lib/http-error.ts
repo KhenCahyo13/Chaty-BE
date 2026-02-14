@@ -1,8 +1,4 @@
-export type HttpError = {
-    errors?: unknown;
-    message: string;
-    statusCode: number;
-};
+import { HttpError } from 'src/types/response';
 
 export const isHttpError = (error: unknown): error is HttpError =>
     typeof error === 'object' &&

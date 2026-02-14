@@ -1,55 +1,12 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
+import {
+    CreateSignedUrlParams,
+    DeleteFileParams,
+    UploadFileParams,
+    UploadFileWithBufferParams,
+} from 'src/types/file-upload';
 
 import { createHttpError } from './http-error';
-
-type UploadFileParams = {
-    bucket: string;
-    file: UploadFileBody;
-    options?: UploadFileOptions;
-    path: string;
-};
-
-type UploadFileWithBufferParams = {
-    bucket: string;
-    buffer: Buffer;
-    cacheControl?: string;
-    contentType?: string;
-    path: string;
-    upsert?: boolean;
-};
-
-type DeleteFileParams = {
-    bucket: string;
-    path: string | string[];
-};
-
-type CreateSignedUrlParams = {
-    bucket: string;
-    download?: boolean | string;
-    expiresIn?: number;
-    path: string;
-};
-
-type UploadFileBody =
-    | ArrayBuffer
-    | ArrayBufferView
-    | Blob
-    | Buffer
-    | File
-    | FormData
-    | NodeJS.ReadableStream
-    | ReadableStream<Uint8Array>
-    | string
-    | URLSearchParams;
-
-type UploadFileOptions = {
-    cacheControl?: string;
-    contentType?: string;
-    duplex?: string;
-    headers?: Record<string, string>;
-    metadata?: Record<string, unknown>;
-    upsert?: boolean;
-};
 
 let supabaseClient: null | SupabaseClient = null;
 

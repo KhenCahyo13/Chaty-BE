@@ -7,5 +7,6 @@ export const redisConfig = {
         Number.isFinite(parsedDefaultTtl) && parsedDefaultTtl > 0
             ? parsedDefaultTtl
             : 3600,
+    namespace: process.env.REDIS_NAMESPACE || 'dev-chaty',
     url: process.env.REDIS_URL,
 };

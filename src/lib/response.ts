@@ -1,15 +1,4 @@
-export type SuccessResponse<T, TMeta = null> = {
-    data: T;
-    message: string;
-    meta?: TMeta;
-    success: true;
-};
-
-export type ErrorResponse<E = unknown> = {
-    errors?: E;
-    message: string;
-    success: false;
-};
+import { ErrorResponse, SuccessResponse } from 'src/types/response';
 
 export const successResponse = <TData, TMeta = null>(
     message: string,

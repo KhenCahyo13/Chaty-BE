@@ -1,5 +1,6 @@
 import 'dotenv/config';
 
+import { formatAllowedOrigins } from '@lib/origin';
 import { initSocket } from '@lib/socket/socket';
 import cors from 'cors';
 import express from 'express';
@@ -18,7 +19,7 @@ const { port } = appConfig;
 app.use(
     cors({
         credentials: true,
-        origin: 'http://localhost:5173',
+        origin: formatAllowedOrigins(process.env.APP_ALLOWED_ORIGINS),
     })
 );
 
