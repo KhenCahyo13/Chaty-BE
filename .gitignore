@@ -7,3 +7,4 @@
 /src/generated/prisma
 /.pnpm-store
 /rules.*
+/.vscode
