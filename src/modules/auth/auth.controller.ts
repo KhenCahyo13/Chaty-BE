@@ -1,7 +1,7 @@
 import { toHttpError } from '@lib/http-error';
 import { errorResponse, successResponse } from '@lib/response';
 import { mapZodIssues } from '@lib/validation-error';
-import { authenticateUser, AuthRequest } from '@modules/auth/auth.middleware';
+import { authenticateUser } from '@modules/auth/auth.middleware';
 import { Router } from 'express';
 
 import {
@@ -10,6 +10,7 @@ import {
     registerPushTokenSchema,
 } from './auth.schema';
 import { login, logout, refresh, registerPushToken } from './auth.service';
+import { AuthRequest } from './auth.types';
 
 const router = Router();
 
